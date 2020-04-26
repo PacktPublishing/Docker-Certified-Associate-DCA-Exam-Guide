@@ -10,7 +10,7 @@
 
 ---
 
-### Following labs can be found under labs/chapter2 directory.
+### Following labs can be found under labs/chapter3 directory.
 
 
 ---
@@ -303,7 +303,7 @@ ec62ee9ed812  CPU2vs2  135.41%  7.391MiB / 11.6GiB  0.06%  5.71kB / 0B  0B / 0B 
 bb1034c8b588  CPU2vs1  98.90%   7.301MiB / 11.6GiB  0.06%  7.98kB / 0B  262kB / 0B  3
 ```
 
-## __Lab3__: Formatting and Filtering Container list Output
+## __Lab4__: Formatting and Filtering Container list Output
 
 In this lab we will review docker container ls output.
 
