@@ -16,7 +16,6 @@
 ---
 ## __Lab1__: Installing Docker runtime and executing "hello world" container
 
-
 This lab will guide you through docker runtime installation steps and running your first container.
 
 1 - To ensure that no previous versions are installed, we will remove any docker* package.
@@ -183,8 +182,10 @@ NS         TYPE NPROCS  PID    USER COMMAND
 4026532199 ipc  2       20863  root  nginx: master process nginx -g daemon off
 4026532200 pid  2       20863  root  nginx: master process nginx -g daemon off
 4026532202 net  2       20863  root  nginx: master process nginx -g daemon off
-This lab showed process isolation within a process running inside containers.
 ```
+
+This lab showed process isolation within a process running inside containers.
+
 
 
 ## __Lab3__: Docker capabilities
