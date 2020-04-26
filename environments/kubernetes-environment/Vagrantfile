@@ -1,0 +1,217 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+class String
+    def black;          "\e[30m#{self}\e[0m" end
+    def red;            "\e[31m#{self}\e[0m" end
+    def cyan;           "\e[36m#{self}\e[0m" end
+end
+
+
+engine_version=''
+engine_mode='default'
+proxy = ''
+
+
+config = YAML.load_file(File.join(File.dirname(__FILE__), 'config.yml'))
+
+base_box=config['environment']['base_box']
+base_box_version=config['environment']['base_box_version']
+
+engine_version=config['environment']['engine_version']
+kubernetes_version=config['environment']['kubernetes_version']
+kubernetes_cni_url=config['environment']['kubernetes_cni_url']
+kubernetes_master_ip=config['environment']['kubernetes_master_ip']
+
+boxes = config['boxes']
+
+boxes_hostsfile_entries=""
+
+
+## EXPERIMENTAL FEATURES
+
+experimental=config['environment']['experimental']
+
+########
+
+
+boxes.each do |box|
+  boxes_hostsfile_entries=boxes_hostsfile_entries+box['mgmt_ip'] + ' ' +  box['name'] + '\n'
+end
+
+#puts boxes_hostsfile_entries
+
+$update_hosts = <<SCRIPT
+    echo "127.0.0.1 localhost" >/etc/hosts
+    echo -e "#{boxes_hostsfile_entries}" |tee -a /etc/hosts
+SCRIPT
+
+puts '--------------------------------------------------------------------------------------------'
+
+puts ' Docker SWARM MODE Vagrant Environment'
+
+puts ' Engine Version: '+engine_version
+
+puts ' Kubernetes Version: '+kubernetes_version
+
+puts ' Kubernetes CNI: ' + kubernetes_cni_url
+
+puts " Experimental Features Enabled" if experimental == true
+
+puts '--------------------------------------------------------------------------------------------'
+
+$install_docker_engine = <<SCRIPT
+  curl -sSk $1 | sh
+  usermod -aG docker vagrant 2>/dev/null
+SCRIPT
+
+$enable_experimental_features = <<SCRIPT
+    echo '{"experimental" : true}'> /etc/docker/daemon.json
+    systemctl restart docker
+SCRIPT
+
+$disable_swap = <<SCRIPT
+    swapoff -a 
+    sed -i '/swap/{ s|^|#| }' /etc/fstab
+SCRIPT
+
+$install_kubernetes = <<SCRIPT
+  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+  echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list 
+  apt-get update -qq
+  apt-get install -y --allow-unauthenticated kubelet=$1 kubeadm=$1 kubectl=$1 kubernetes-cni
+  sed -i \'9s/^/Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"\\n/\' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+  systemctl daemon-reload
+  systemctl enable kubelet
+  echo "Kubelet Configured without Swap"
+SCRIPT
+
+
+$create_kubernetes_cluster = <<SCRIPT
+  kubeadm init --pod-network-cidr 10.244.0.0/16 --ignore-preflight-errors=all --apiserver-advertise-address $1
+  sleep 30
+  mkdir -p ~vagrant/.kube
+  cp -i /etc/kubernetes/admin.conf ~vagrant/.kube/config
+  chown vagrant:vagrant ~vagrant/.kube/config
+  kubeadm token list |awk '/default-node-token/ { print $1 }'> /tmp_deploying_stage/token
+  while true;do curl -ksSL https://$1:6443 && break;done
+  kubectl --kubeconfig=/home/vagrant/.kube/config  apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+SCRIPT
+
+$join_kubernetes_cluster = <<SCRIPT
+  kubeadm join $1:6443 --token "$(cat /tmp_deploying_stage/token)" --discovery-token-unsafe-skip-ca-verification
+SCRIPT
+
+Vagrant.configure(2) do |config|
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    if proxy != ''
+        puts " Using proxy"
+        config.proxy.http = proxy
+        config.proxy.https = proxy
+        config.proxy.no_proxy = "localhost,127.0.0.1"
+    end
+  end
+  config.vm.box = base_box
+  config.vm.box_version = base_box_version
+  config.vm.synced_folder "tmp_deploying_stage/", "/tmp_deploying_stage",create:true
+  config.vm.synced_folder "labs/", "/labs",create:true
+  case engine_version
+    when "experimental"
+        engine_download_url="https://experimental.docker.com"
+    when "current", "latest", "stable"
+        engine_download_url="https://get.docker.com"
+    when "test", "testing", "rc"
+        engine_download_url="https://test.docker.com"
+    else
+        STDERR.puts "Unknown Docker Engine version, please use 'experimental', 'test' or 'stable'".red
+         exit
+    end
+
+  config.vm.synced_folder "labs/", "/labs",create:true
+  boxes.each do |node|
+    config.vm.define node['name'] do |config|
+      config.vm.hostname = node['name']
+      config.vm.provider "virtualbox" do |v|
+        v.name = node['name']
+        v.customize ["modifyvm", :id, "--memory", node['mem']]
+        v.customize ["modifyvm", :id, "--cpus", node['cpu']]
+	      v.customize ["modifyvm", :id, "--macaddress1", "auto"]
+        v.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
+        v.customize ["modifyvm", :id, "--nictype2", "Am79C973"]
+        v.customize ["modifyvm", :id, "--nictype3", "Am79C973"]
+        v.customize ["modifyvm", :id, "--nictype4", "Am79C973"]
+
+        v.customize ["modifyvm", :id, "--nicpromisc1", "allow-all"]
+        v.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+        v.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
+        v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]      
+      end
+
+      config.vm.network "private_network",
+        ip: node['mgmt_ip'],
+        virtualbox__intnet: true
+
+
+      config.vm.network "private_network",
+        ip: node['hostonly_ip']
+
+      # config.vm.network "public_network",
+      # bridge: ["enp4s0","wlp3s0","enp3s0f1","wlp2s0"],
+      # auto_config: true
+
+
+      config.vm.provision "shell", inline: <<-SHELL
+      systemctl disable apt-daily.service
+      systemctl disable apt-daily.timer
+      DEBIAN_FRONTEND=noninteractive apt-get update -qq
+      DEBIAN_FRONTEND=noninteractive apt-get install -qq chrony curl
+      timedatectl set-timezone Europe/Madrid
+      SHELL
+
+      config.vm.provision :shell, :inline => $update_hosts
+
+      config.vm.provision "shell" do |s|
+       			s.name       = "Install Docker Engine from "+engine_download_url
+        		s.inline     = $install_docker_engine
+            s.args       = engine_download_url
+      end
+
+      config.vm.provision :shell, :inline => $disable_swap
+
+
+      if experimental == true
+        config.vm.provision "shell" do |s|
+              s.name       = "Experimental Features Enabled on Engine"
+              s.inline     = $enable_experimental_features
+        end
+      end
+
+      config.vm.provision "shell" do |s|
+        s.name       = "Install Kubernetes packages version "+kubernetes_version
+        s.inline     = $install_kubernetes
+        s.args       = [kubernetes_version, kubernetes_cni_url]
+      end
+    
+      if node['role'] == "master"
+        config.vm.network "forwarded_port", guest: 6443, host: 6443, auto_correct: true
+        
+        config.vm.provision "shell" do |s|
+          s.name       = "Create Kubernetes Cluster"
+          s.inline     = $create_kubernetes_cluster
+          s.args       = kubernetes_master_ip
+        end
+      else
+        config.vm.provision "shell" do |s|
+          s.name       = "Join Kubernetes Cluster"
+          s.inline     = $join_kubernetes_cluster
+          s.args       = kubernetes_master_ip
+        end 
+      end
+
+    end
+  end
+
+end

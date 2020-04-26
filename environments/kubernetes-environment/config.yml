@@ -1,0 +1,35 @@
+environment:
+  # Valid Engine Versions are 'experimental', 'test' and 'current'
+  engine_version: "current"
+  experimental: false
+  kubernetes_version: "1.14.0-00"
+  kubernetes_cni_url: "https://docs.projectcalico.org/v3.8/manifests/calico.yaml"
+  
+  base_box: "frjaraur/xenial64"
+  base_box_version: "1.4"
+  #proxy: "http://your_proxy_goes_here:with_the_port"
+
+  kubernetes_master_ip: "10.10.10.11" # Change it if you modify cluster nodes IP addresses
+
+boxes:
+- name: "node1"
+  role: "master"
+  mgmt_ip: "10.10.10.11"
+  hostonly_ip: "192.168.56.11"
+  mem: "3524"
+  cpu: "1"
+
+- name: "node2"
+  role: "worker"
+  mgmt_ip: "10.10.10.12"
+  hostonly_ip: "192.168.56.12"
+  mem: "2048"
+  cpu: "1"
+
+- name: "node3"
+  role: "worker"
+  mgmt_ip: "10.10.10.13"
+  hostonly_ip: "192.168.56.13"
+  mem: "2048"
+  cpu: "1"
+  
