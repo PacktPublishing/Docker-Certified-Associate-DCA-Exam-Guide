@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+    random:
+        build: app
+        labels:
+            role: backend
+        ports:
+        - 3000
+        networks:
+        - lab
+networks:
+  lab: 

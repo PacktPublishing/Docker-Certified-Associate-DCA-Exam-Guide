@@ -16,7 +16,9 @@
 ---
 ## __Lab1__: Using Volumes to Code on your Laptop
 
-1 - In this lab we will run a container with our application code inside. As application is created using an interpreted language, any change or code modification will be refreshed. We created a simple Python Flask application. This is the content of [_app.py_](./app.py) file.
+In this lab we will run a container with our application code inside. As application is created using an interpreted language, any change or code modification will be refreshed. 
+
+1 - We created a simple Python Flask application. This is the content of [_app.py_](./app.py) file.
 ```
 from flask import Flask, render_template
 app = Flask(__name__)
