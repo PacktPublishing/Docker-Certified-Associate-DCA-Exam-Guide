@@ -2,34 +2,36 @@ environment:
   # Valid Engine Versions are 'experimental', 'test' and 'current'
   engine_version: "current"
   experimental: false
-  kubernetes_version: "1.14.0-00"
-  kubernetes_cni_url: "https://docs.projectcalico.org/v3.8/manifests/calico.yaml"
-
+  
   base_box: "frjaraur/xenial64"
   base_box_version: "1.4"
   #proxy: "http://your_proxy_goes_here:with_the_port"
 
-  kubernetes_master_ip: "10.10.10.11" # Change it if you modify cluster nodes IP addresses
-
 boxes:
-- name: "kubernetes-node1"
-  role: "master"
+- name: "enterprise-node1"
+  swarm_role: "manager"
   mgmt_ip: "10.10.10.11"
   hostonly_ip: "192.168.56.11"
-  mem: "3524"
+  mem: "4096"
   cpu: "2"
 
-- name: "kubernetes-node2"
-  role: "worker"
+- name: "enterprise-node2"
+  swarm_role: "manager"
   mgmt_ip: "10.10.10.12"
   hostonly_ip: "192.168.56.12"
-  mem: "2048"
-  cpu: "1"
+  mem: "4096"
+  cpu: "2"
 
-- name: "kubernetes-node3"
-  role: "worker"
+- name: "enterprise-node3"
+  swarm_role: "manager"
   mgmt_ip: "10.10.10.13"
   hostonly_ip: "192.168.56.13"
-  mem: "2048"
+  mem: "4096"
+  cpu: "2"
+  
+- name: "enterprise-node4"
+  swarm_role: "worker"
+  mgmt_ip: "10.10.10.14"
+  hostonly_ip: "192.168.56.14"
+  mem: "4096"
   cpu: "1"
-
