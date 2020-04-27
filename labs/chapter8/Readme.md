@@ -106,69 +106,56 @@ jw9uvjcsyg05u1slm4wu0hz6l * node4     Ready Active            Reachable   19.03.
 ```
 $ vssh node1
 vagrant@node1:~$ sudo systemctl stop docker
+```
+
 Connecting to other manager (node2 for example, recently promoted node).
+```
 $ vssh node2
 vagrant@node2:~$ docker node ls
-ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE VERSION
-b1t5o5x8mqbz77e9v4ihd7cec node1 Down Active Unreachable 19.03.5
+ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE   VERSION
+b1t5o5x8mqbz77e9v4ihd7cec   node1 Down Active Unreachable 19.03.5
 rj3rgb9egnb256cms0zt8pqew * node2 Ready Active Reachable 19.03.5
-ui67xyztnw8kn6fjjezjdtwxd node3 Ready Active 19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l node4 Ready Active Leader 19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   node3 Ready Active           19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l   node4 Ready Active  Leader   19.03.5
+```
+
 New leader was elected between one of the managers.
 We now start again node1 Docker Engine Daemon.
+```
 $ vssh node1
 vagrant@node1:~$ sudo systemctl start docker
 vagrant@node1:~$ docker node ls
-ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE VERSION
+ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE   VERSION
 b1t5o5x8mqbz77e9v4ihd7cec * node1 Ready Active Reachable 19.03.5
-rj3rgb9egnb256cms0zt8pqew node2 Ready Active Reachable 19.03.5
-ui67xyztnw8kn6fjjezjdtwxd node3 Ready Active 19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l node4 Ready Active Leader 19.03.5
-Node remains as manager but it is not now the leader of the cluster because a new one was
-elected when it failed.
+rj3rgb9egnb256cms0zt8pqew   node2 Ready Active Reachable 19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   node3 Ready Active           19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l   node4 Ready Active  Leader   19.03.5
+```
+
+Node remains as manager but it is not now the leader of the cluster because a new one was elected when it failed.
+
 8 - Let's demote all non-leader nodes to workers for the rest of the labs.
+```
 vagrant@node1:~$ docker node update --role worker node2
 node2
+
 vagrant@node1:~$ docker node update --role worker node1
 node1
+
 vagrant@node1:~$ docker node ls
-Error response from daemon: This node is not a swarm manager. Worker nodes
-can't be used to view or modify cluster state. Please run this command on a
-manager node or promote the current node to a manager.
-Notice the error when listing again. Node1 is not manager now hence we can not manage
-the cluster from this node anymore. All management commands will run now from node4
-for the rest of the labs. Node4 is the only manager hence it is the cluster leader.
+Error response from daemon: This node is not a swarm manager. Worker nodes can't be used to view or modify cluster state. Please run this command on a manager node or promote the current node to a manager.
+```
+
+Notice the error when listing again. Node1 is not manager now hence we can not manage the cluster from this node anymore. All management commands will run now from node4 for the rest of the labs. Node4 is the only manager hence it is the cluster leader.
+```
 $ vssh node4
 vagrant@node4:~$ docker node ls
-ID
- HOSTNAME
- STATUS
-AVAILABILITY
- MANAGER STATUS
- ENGINE VERSION
-b1t5o5x8mqbz77e9v4ihd7cec
- node1
- Ready
-Active
- 19.03.5
-rj3rgb9egnb256cms0zt8pqew
- node2
- Ready
-Active
- 19.03.5
-ui67xyztnw8kn6fjjezjdtwxd
- node3
- Ready
-Active
- 19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l *
- node4
- Ready
-Active
- Leader
- 19.03.5
-On next lab we will deploy a simple webserver service.
-
+ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE   VERSION
+b1t5o5x8mqbz77e9v4ihd7cec   node1 Ready Active          19.03.5
+rj3rgb9egnb256cms0zt8pqew   node2 Ready Active          19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   node3 Ready Active          19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l * node4 Ready Active  Leader  19.03.5
+```
 
 ## __Lab2__: Deploy a Simple Replicated Service
 
@@ -202,14 +189,20 @@ overall progress: 3 out of 3 tasks
 2/3: running [==================================================>]
 3/3: running [==================================================>]
 verify: Service converged
+```
+
 If we review replicas distribution we will discover where containers are running.
+```
 vagrant@node4:~$ docker service ps webserver
-ID NAME IMAGE NODE DESIRED STATE CURRENT STATE ERROR PORTS
+ID            NAME        IMAGE       NODE  DESIRED STATE CURRENT STATE ERROR PORTS
 wb4knzpud1z5 webserver.1 nginx:alpine node3 Running Running 2 minutes ago
 ie9br2pblxu6 webserver.2 nginx:alpine node4 Running Running 50 seconds ago
 9d021pmvnnrq webserver.3 nginx:alpine node1 Running Running 50 seconds ago
-We notice in this case that node2 did not receive any replica. But we can force replicas to
-run there.
+```
+
+We notice in this case that node2 did not receive any replica. But we can force replicas to run there.
+
+
 4 - To force specific locations we can add labels to specific nodes and add constraints to nodes.
 ```
 $ docker node update --label-add tier=front node2
@@ -260,8 +253,6 @@ vagrant@node4:~$ docker service ps webserver
 
 Tasks did not move because tasks already satisfy service constraints (no constraint in the new situation).
 
-
-.
 6 - On this step we will pause node3 and drain node2.
 ```
 vagrant@node4:~$ docker node update --availability pause node3
@@ -272,47 +263,29 @@ node2
 ```
 
 Now, let's review service replica distribution
-
-
+```
 vagrant@node4:~$ docker service ps webserver --filter desired-state=running
-ID
- NAME
- IMAGE
- NODE
-DESIRED STATE
- CURRENT STATE
- ERROR
- PORTS
-6z55nch0q8ai
- webserver.1
- nginx:alpine
- node4
-Running
- Running 3 minutes ago
-8il59udc4iey
- webserver.2
- nginx:alpine
- node4
-Running
- Running 3 minutes ago
-1y4q96hb3hik
- webserver.3
- nginx:alpine
- node1
-Running
- Running 3 minutes ago
+ID              NAME        IMAGE         NODE  DESIRED STATE  CURRENT STATE ERROR PORTS
+6z55nch0q8ai    webserver.1 nginx:alpine  node4 Running        Running 3 minutes ago
+8il59udc4iey    webserver.2 nginx:alpine  node4 Running        Running 3 minutes ago
+1y4q96hb3hik    webserver.3 nginx:alpine  node1 Running        Running 3 minutes ago
+```
+
 Notice that only node1 and node4 get some tasks because node3 is paused and we removed
 all tasks on node2.
 
 
 7 - We will remove webserver service and enable nodes node2 and node3 again.
+```
 vagrant@node4:~$ docker service rm webserver
 webserver
+
 vagrant@node4:~$ docker node update --availability active node2
 node2
+
 vagrant@node4:~$ docker node update --availability active node3
 node3
-
+```
 
 ## __Lab3__: Deploy a Global Service
 
@@ -334,38 +307,11 @@ All nodes will receive their own replica.
 ```
 vagrant@node4:~$ docker service ps webserver --filter desired-state=running
 
-ID
- NAME
- IMAGE
-NODE
- DESIRED STATE
- CURRENT STATE
- ERROR
-PORTS
-0jb3tolmta6u
- webserver.ui67xyztnw8kn6fjjezjdtwxd
- nginx:alpine
-node3
- Running
- Running about a minute ago
-im69ybzgd879
- webserver.rj3rgb9egnb256cms0zt8pqew
- nginx:alpine
-node2
- Running
- Running about a minute ago
-knh5ntkx7b3r
- webserver.jw9uvjcsyg05u1slm4wu0hz6l
- nginx:alpine
-node4
- Running
- Running about a minute ago
-26kzify7m7xd
- webserver.b1t5o5x8mqbz77e9v4ihd7cec
- nginx:alpine
-node1
- Running
- Running about a minute ago
+ID           NAME                                 IMAGE     NODE  DESIRED STATE      CURRENT STATE  ERROR PORTS
+0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine node3 Running  Running about a minute ago
+im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine node2 Running  Running about a minute ago
+knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine node4 Running  Running about a minute ago
+26kzify7m7xd webserver.b1t5o5x8mqbz77e9v4ihd7cec nginx:alpine node1 Running  Running about a minute ago
 ```
 
 2 - We will now drain node1 for example and review the new tasks distribution.
@@ -375,32 +321,10 @@ node1
 
 vagrant@node4:~$ docker service ps webserver --filter desired-state=running
 
-ID
- NAME
- IMAGE
-NODE
- DESIRED STATE
- CURRENT STATE
- ERROR
-PORTS
-0jb3tolmta6u
- webserver.ui67xyztnw8kn6fjjezjdtwxd
- nginx:alpine
-node3
- Running
- Running 3 minutes ago
-im69ybzgd879
- webserver.rj3rgb9egnb256cms0zt8pqew
- nginx:alpine
-node2
- Running
- Running 3 minutes ago
-knh5ntkx7b3r
- webserver.jw9uvjcsyg05u1slm4wu0hz6l
- nginx:alpine
-node4
- Running
- Running 3 minutes ago
+ID           NAME                                 IMAGE      NODE  DESIRED STATE    CURRENT STATE   ERROR  PORTS
+0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine node3 Running Running 3 minutes ago
+im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine node2 Running Running 3 minutes ago
+knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine node4 Running Running 3 minutes ago
 ```
 
 None received node2 task. Because global services will only run one replica of defined service.
@@ -411,41 +335,12 @@ vagrant@node4:~$ docker node update --availability active node1
 node1
 
 vagrant@node4:~$ docker service ps webserver --filter desired-state=running
-ID
- NAME
- IMAGE
-NODE
- DESIRED STATE
- CURRENT STATE
- ERROR
-PORTS
-sun8lxwu6p3k
- webserver.b1t5o5x8mqbz77e9v4ihd7cec
- nginx:alpine
-node1
- Running
- Running 1 second ago
-0jb3tolmta6u
-node3
-im69ybzgd879
-node2
-knh5ntkx7b3r
-node4
-webserver.ui67xyztnw8kn6fjjezjdtwxd
- nginx:alpine
-Running
- Running 5 minutes
- ago
-webserver.rj3rgb9egnb256cms0zt8pqew
- nginx:alpine
-Running
- Running 5 minutes
- ago
-webserver.jw9uvjcsyg05u1slm4wu0hz6l
- nginx:alpine
-Running
- Running 5 minutes
- ago
+ID            NAME                                 IMAGE      NODE   DESIRED STATE   CURRENT STATE  ERROR PORTS
+sun8lxwu6p3k webserver.b1t5o5x8mqbz77e9v4ihd7cec nginx:alpine node1 Running Running 1 second ago
+0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine node3 Running Running 5 minutes
+im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine node2 Running Running 5 minutes
+knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine node4 Running Running 5 minutes
+
 ```
 
 4 - We will remove webserver service again to clear cluster for the next labs.
@@ -496,50 +391,13 @@ Update took more than 60 seconds because Swarm updated tasks one by one in 10 se
 New version is running now
 ```
 vagrant@node4:~$ docker service ps webserver --filter desired-state=running
-ID
- NAME
- IMAGE
- NODE
-DESIRED STATE
- CURRENT STATE
- ERROR
- PORTS
-n9s6lrk8zp32
- webserver.1
- nginx:alpine-perl
- node4
-Running
- Running 4 minutes ago
-68istkhse4ei
- webserver.2
- nginx:alpine-perl
- node1
-Running
- Running 5 minutes ago
-j6pqig7njhdw
- webserver.3
- nginx:alpine-perl
- node1
-Running
- Running 6 minutes ago
-k4vlmeb56kys
- webserver.4
- nginx:alpine-perl
- node2
-Running
- Running 5 minutes ago
-k50fxl1gms44
- webserver.5
- nginx:alpine-perl
- node3
-Running
- Running 5 minutes ago
-apur3w3nq95m
- webserver.6
- nginx:alpine-perl
- node3
-Running
- Running 5 minutes ago
+ID              NAME          IMAGE               NODE   DESIRED STATE    CURRENT STATE     ERROR     PORTS
+n9s6lrk8zp32    webserver.1   nginx:alpine-perl   node4  Running  Running 4 minutes ago
+68istkhse4ei    webserver.2   nginx:alpine-perl   node1  Running  Running 5 minutes ago
+j6pqig7njhdw    webserver.3   nginx:alpine-perl   node1  Running  Running 6 minutes ago
+k4vlmeb56kys    webserver.4   nginx:alpine-perl   node2  Running  Running 5 minutes ago
+k50fxl1gms44    webserver.5   nginx:alpine-perl   node3  Running  Running 5 minutes ago
+apur3w3nq95m    webserver.6   nginx:alpine-perl   node3  Running  Running 5 minutes ago
 ```
 
 3 - We will remove webserver service again to clear cluster for the next labs.
@@ -780,6 +638,7 @@ verify: Service converged
 We chose not run any replica on manager node because we will use _curl_ from _node4_ on this lab.
 
 2 - Let's test connectivity from manager node4.
+```
 vagrant@node4:~$ curl 0.0.0.0:8000/text
 APP_VERSION: 1.0
 COLOR: orange
@@ -787,13 +646,18 @@ CONTAINER_NAME: d3a886d5fe34
 CONTAINER_IP: 10.0.0.11 172.18.0.3
 CLIENT_IP: ::ffff:10.0.0.5
 CONTAINER_ARCH: linux
-We deployed one replica and it is running "orange" color. Notice container IP address and
-its name.
+```
+
+We deployed one replica and it is running "orange" color. Notice container IP address and its name.
+
 3 - Let's run 5 more replicas.
+```
 vagrant@node4:~$ docker service update --replicas 6 colors --quiet
 colors
-4 - If we test again service port 8080, we will get different colors as containers were
-launched without color settings.
+```
+
+4 - If we test again service port 8080, we will get different colors as containers were launched without color settings.
+```
 vagrant@node4:~$ curl 0.0.0.0:8000/text
 APP_VERSION: 1.0
 COLOR: red
@@ -801,6 +665,7 @@ CONTAINER_NAME: 64fb2a3009b2
 CONTAINER_IP: 10.0.0.12 172.18.0.4
 CLIENT_IP: ::ffff:10.0.0.5
 CONTAINER_ARCH: linux
+
 vagrant@node4:~$ curl 0.0.0.0:8000/text
 APP_VERSION: 1.0
 COLOR: cyan
@@ -808,13 +673,15 @@ CONTAINER_NAME: 73b07ee0c287
 CONTAINER_IP: 10.0.0.14 172.18.0.3
 CLIENT_IP: ::ffff:10.0.0.5
 CONTAINER_ARCH: linux
-We get different colors on different containers. Router Mesh is guiding our requests using
-ingress overlay network to "colors" tasks containers.
+```
+
+We get different colors on different containers. Router Mesh is guiding our requests using ingress overlay network to "colors" tasks containers.
 
 5 - Let's execute remove "colors" service for next and final lab.
+```
 $ docker service rm colors
 colors
-
+```
 
 ## __Lab6__: Service Discovery
 
@@ -829,14 +696,16 @@ vagrant@node4:~$ docker network create --attachable -d overlay test
 2 - Now we will create 2 different "colors" services. Each one will use different endpoint modes.
 ```
 vagrant@node4:~$ docker service create --replicas 2 \
---name colors-vip --network test --quiet codegazers/colors:1.13
+--name colors-vip --network test \
+--quiet codegazers/colors:1.13
 4m2vvbnqo9wgf8awnf53zr5b2
 ```
 
 And another one for dnsrr
 ```
 vagrant@node4:~$ docker service create --replicas 2 \
---name colors-dnsrr --network test --quiet --endpoint-mode dnsrr
+--name colors-dnsrr --network test \
+--quiet --endpoint-mode dnsrr
 codegazers/colors:1.13
 wqpv929pe5ehniviclzkdvcl0
 ```
