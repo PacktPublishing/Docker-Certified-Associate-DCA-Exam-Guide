@@ -24,10 +24,10 @@
 
 In this lab we will create a Docker Swarm cluster from the very begining.
 
-1 - Connect to node1 and initialize a new cluster using _docker swarm init_: 
+1 - Connect to swarm-node1 and initialize a new cluster using _docker swarm init_: 
 ```
-$ vssh node1
-vagrant@node1:~$ docker swarm init
+$ vagrant ssh swarm-node1
+vagrant@swarm-node1:~$ docker swarm init
 Error response from daemon: could not choose an IP address to advertise
 since this system has multiple addresses on different interfaces (10.0.2.15
 on eth0 and 10.10.10.11 on eth1) - specify one with --advertise-addr
@@ -36,7 +36,7 @@ We get an error and this is completely normal because you are using Vagrant and 
 
 Let's try again using _--advertise-addr 10.10.10.11_:
 ```
-vagrant@node1:~$ docker swarm init --advertise-addr 10.10.10.11
+vagrant@swarm-node1:~$ docker swarm init --advertise-addr 10.10.10.11
 Swarm initialized: current node (b1t5o5x8mqbz77e9v4ihd7cec) is now a manager.
 To add a worker to this swarm, run the following command:
 docker swarm join --token SWMTKN-1-3xfi4qggreh81lbr98d63x7299gtz1fanwfjkselg9ok5wroje-didcmb39w7apwokrah6xx4cus 10.10.10.11:2377
@@ -46,124 +46,124 @@ To add a manager to this swarm, run 'docker swarm join-token manager' and follow
 
 Now Swarm was initialized correctly.
 
-2 - Add a second node connecting to node2 and executing described command in initialization output.
+2 - Add a second node connecting to swarm-node2 and executing described command in initialization output.
 ```
-$ vssh node2
-vagrant@node2:~$ docker swarm join --token SWMTKN-1-3xfi4qggreh81lbr98d63x7299gtz1fanwfjkselg9ok5wroje-didcmb39w7apwokrah6xx4cus 10.10.10.11:2377
+$ vagrant ssh swarm-node2
+vagrant@swarm-node2:~$ docker swarm join --token SWMTKN-1-3xfi4qggreh81lbr98d63x7299gtz1fanwfjkselg9ok5wroje-didcmb39w7apwokrah6xx4cus 10.10.10.11:2377
 This node joined a swarm as a worker.
 ```
 
 Node was added as worker.
 
-3 - Verify on node1 that new node was added.
+3 - Verify on swarm-node1 that new node was added.
 ```
-$ vssh node1
-vagrant@node1:~$ docker node ls
+$ vagrant ssh swarm-node1
+vagrant@swarm-node1:~$ docker node ls
 ID                        HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE VERSION
-b1t5o5x8mqbz77e9v4ihd7cec * node1  Ready  Active          Leader          19.03.5
-rj3rgb9egnb256cms0zt8pqew   node2  Ready  Active                          19.03.5
+b1t5o5x8mqbz77e9v4ihd7cec * swarm-node1  Ready  Active          Leader          19.03.5
+rj3rgb9egnb256cms0zt8pqew   swarm-node2  Ready  Active                          19.03.5
 ```
 
-4 - We will execute same joining process on node3.
+4 - We will execute same joining process on swarm-node3.
 ```
-vagrant@node1:~$ docker node ls
+vagrant@swarm-node1:~$ docker node ls
 ID                          HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE VERSION
-b1t5o5x8mqbz77e9v4ihd7cec * node1     Ready Active        Leader          19.03.5
-rj3rgb9egnb256cms0zt8pqew   node2     Ready Active                        19.03.5
-ui67xyztnw8kn6fjjezjdtwxd   node3     Ready Active                        19.03.5
+b1t5o5x8mqbz77e9v4ihd7cec * swarm-node1     Ready Active        Leader          19.03.5
+rj3rgb9egnb256cms0zt8pqew   swarm-node2     Ready Active                        19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   swarm-node3     Ready Active                        19.03.5
 ```
 
 5 - Now we will review the token for managers so next node will be added as manager.
 ```
-vagrant@node1:~$ docker swarm join-token manager
+vagrant@swarm-node1:~$ docker swarm join-token manager
 To add a manager to this swarm, run the following command:
 docker swarm join --token SWMTKN-1-3xfi4qggreh81lbr98d63x7299gtz1fanwfjkselg9ok5wroje-aidvtmglkdyvvqurnivcsmyzm 10.10.10.11:2377
 ```
 
-Now, we connect to node4 and execute shown joinning command.
+Now, we connect to swarm-node4 and execute shown joinning command.
 ```
-vagrant@node4:~$ docker swarm join --token SWMTKN-1-3xfi4qggreh81lbr98d63x7299gtz1fanwfjkselg9ok5wroje-aidvtmglkdyvvqurnivcsmyzm 10.10.10.11:2377
+vagrant@swarm-node4:~$ docker swarm join --token SWMTKN-1-3xfi4qggreh81lbr98d63x7299gtz1fanwfjkselg9ok5wroje-aidvtmglkdyvvqurnivcsmyzm 10.10.10.11:2377
 This node joined a swarm as a manager
 ```
 
-6 - Cluster now have 4 nodes, 2 managers and 2 workers. This will not provide high availability if Leader fails. Letś promote node2 to manager too for example.
+6 - Cluster now have 4 nodes, 2 managers and 2 workers. This will not provide high availability if Leader fails. Letś promote swarm-node2 to manager too for example.
 ```
-vagrant@node4:~$ docker node update --role manager node2
-node2
+vagrant@swarm-node4:~$ docker node update --role manager swarm-node2
+swarm-node2
 ```
 
 And we can review node status again. Managers are show as "Reachable" or "Leader", indicating that this node is the cluster leader.
 ```
-vagrant@node4:~$ docker node ls
+vagrant@swarm-node4:~$ docker node ls
 ID                        HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE VERSION
-b1t5o5x8mqbz77e9v4ihd7cec   node1     Ready Active            Leader      19.03.5
-rj3rgb9egnb256cms0zt8pqew   node2     Ready Active            Reachable   19.03.5
-ui67xyztnw8kn6fjjezjdtwxd   node3     Ready Active                        19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l * node4     Ready Active            Reachable   19.03.5
+b1t5o5x8mqbz77e9v4ihd7cec   swarm-node1     Ready Active            Leader      19.03.5
+rj3rgb9egnb256cms0zt8pqew   swarm-node2     Ready Active            Reachable   19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   swarm-node3     Ready Active                        19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l * swarm-node4     Ready Active            Reachable   19.03.5
 ```
 
-7 - We will just leave one manager for the rest of the Labs, but first we will kill node1 Docker Engine Daemon to see what happens in the cluster.
+7 - We will just leave one manager for the rest of the Labs, but first we will kill swarm-node1 Docker Engine Daemon to see what happens in the cluster.
 ```
-$ vssh node1
-vagrant@node1:~$ sudo systemctl stop docker
+$ vagrant ssh swarm-node1
+vagrant@swarm-node1:~$ sudo systemctl stop docker
 ```
 
-Connecting to other manager (node2 for example, recently promoted node).
+Connecting to other manager (swarm-node2 for example, recently promoted node).
 ```
-$ vssh node2
-vagrant@node2:~$ docker node ls
+$ vagrant ssh swarm-node2
+vagrant@swarm-node2:~$ docker node ls
 ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE   VERSION
-b1t5o5x8mqbz77e9v4ihd7cec   node1 Down Active Unreachable 19.03.5
-rj3rgb9egnb256cms0zt8pqew * node2 Ready Active Reachable 19.03.5
-ui67xyztnw8kn6fjjezjdtwxd   node3 Ready Active           19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l   node4 Ready Active  Leader   19.03.5
+b1t5o5x8mqbz77e9v4ihd7cec   swarm-node1 Down Active Unreachable 19.03.5
+rj3rgb9egnb256cms0zt8pqew * swarm-node2 Ready Active Reachable 19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   swarm-node3 Ready Active           19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l   swarm-node4 Ready Active  Leader   19.03.5
 ```
 
 New leader was elected between one of the managers.
-We now start again node1 Docker Engine Daemon.
+We now start again swarm-node1 Docker Engine Daemon.
 ```
-$ vssh node1
-vagrant@node1:~$ sudo systemctl start docker
-vagrant@node1:~$ docker node ls
+$ vagrant ssh swarm-node1
+vagrant@swarm-node1:~$ sudo systemctl start docker
+vagrant@swarm-node1:~$ docker node ls
 ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE   VERSION
-b1t5o5x8mqbz77e9v4ihd7cec * node1 Ready Active Reachable 19.03.5
-rj3rgb9egnb256cms0zt8pqew   node2 Ready Active Reachable 19.03.5
-ui67xyztnw8kn6fjjezjdtwxd   node3 Ready Active           19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l   node4 Ready Active  Leader   19.03.5
+b1t5o5x8mqbz77e9v4ihd7cec * swarm-node1 Ready Active Reachable 19.03.5
+rj3rgb9egnb256cms0zt8pqew   swarm-node2 Ready Active Reachable 19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   swarm-node3 Ready Active           19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l   swarm-node4 Ready Active  Leader   19.03.5
 ```
 
 Node remains as manager but it is not now the leader of the cluster because a new one was elected when it failed.
 
 8 - Let's demote all non-leader nodes to workers for the rest of the labs.
 ```
-vagrant@node1:~$ docker node update --role worker node2
-node2
+vagrant@swarm-node1:~$ docker node update --role worker swarm-node2
+swarm-node2
 
-vagrant@node1:~$ docker node update --role worker node1
-node1
+vagrant@swarm-node1:~$ docker node update --role worker swarm-node1
+swarm-node1
 
-vagrant@node1:~$ docker node ls
+vagrant@swarm-node1:~$ docker node ls
 Error response from daemon: This node is not a swarm manager. Worker nodes can't be used to view or modify cluster state. Please run this command on a manager node or promote the current node to a manager.
 ```
 
-Notice the error when listing again. Node1 is not manager now hence we can not manage the cluster from this node anymore. All management commands will run now from node4 for the rest of the labs. Node4 is the only manager hence it is the cluster leader.
+Notice the error when listing again. swarm-node1 is not manager now hence we can not manage the cluster from this node anymore. All management commands will run now from swarm-node4 for the rest of the labs. swarm-node4 is the only manager hence it is the cluster leader.
 ```
-$ vssh node4
-vagrant@node4:~$ docker node ls
+$ vagrant ssh swarm-node4
+vagrant@swarm-node4:~$ docker node ls
 ID HOSTNAME STATUS AVAILABILITY MANAGER STATUS ENGINE   VERSION
-b1t5o5x8mqbz77e9v4ihd7cec   node1 Ready Active          19.03.5
-rj3rgb9egnb256cms0zt8pqew   node2 Ready Active          19.03.5
-ui67xyztnw8kn6fjjezjdtwxd   node3 Ready Active          19.03.5
-jw9uvjcsyg05u1slm4wu0hz6l * node4 Ready Active  Leader  19.03.5
+b1t5o5x8mqbz77e9v4ihd7cec   swarm-node1 Ready Active          19.03.5
+rj3rgb9egnb256cms0zt8pqew   swarm-node2 Ready Active          19.03.5
+ui67xyztnw8kn6fjjezjdtwxd   swarm-node3 Ready Active          19.03.5
+jw9uvjcsyg05u1slm4wu0hz6l * swarm-node4 Ready Active  Leader  19.03.5
 ```
 
 ## __Lab2__: Deploy a Simple Replicated Service
 
-In this lab we will deploy a simple replicated service. From node4, we will create a replicated service (by default) and test how we can distributemore replicas on different nodes.
+In this lab we will deploy a simple replicated service. From swarm-node4, we will create a replicated service (by default) and test how we can distributemore replicas on different nodes.
 
 1 - Deploy _webserver_ service using a simple _nginx:alpine_ image.
 ```
-vagrant@node4:~$ docker service create --name webserver nginx:alpine
+vagrant@swarm-node4:~$ docker service create --name webserver nginx:alpine
 kh906v3xg1ni98xk466kk48p4
 overall progress: 1 out of 1 tasks
 1/1: running [==================================================>]
@@ -173,12 +173,12 @@ Notice that we waited few seconds until all instances are correctly running. Tim
 
 2 - Once it is deployed we can review where replica was started.
 ```
-vagrant@node4:~$ docker service ps webserver
+vagrant@swarm-node4:~$ docker service ps webserver
 ID           NAME         IMAGE        NODE   DESIRED STATE CURRENT STATE ERROR PORTS
-wb4knzpud1z5 webserver.1  nginx:alpine node3    Running     Running 14 seconds ago
+wb4knzpud1z5 webserver.1  nginx:alpine swarm-node3    Running     Running 14 seconds ago
 ```
 
-In this case nginx was deployed on _node4_. This may vary in your environment.
+In this case nginx was deployed on _swarm-node4_. This may vary in your environment.
 
 3 - We can scale the number of replicas to 3 and review how they were distributed.
 ```
@@ -193,25 +193,25 @@ verify: Service converged
 
 If we review replicas distribution we will discover where containers are running.
 ```
-vagrant@node4:~$ docker service ps webserver
+vagrant@swarm-node4:~$ docker service ps webserver
 ID            NAME        IMAGE       NODE  DESIRED STATE CURRENT STATE ERROR PORTS
-wb4knzpud1z5 webserver.1 nginx:alpine node3 Running Running 2 minutes ago
-ie9br2pblxu6 webserver.2 nginx:alpine node4 Running Running 50 seconds ago
-9d021pmvnnrq webserver.3 nginx:alpine node1 Running Running 50 seconds ago
+wb4knzpud1z5 webserver.1 nginx:alpine swarm-node3 Running Running 2 minutes ago
+ie9br2pblxu6 webserver.2 nginx:alpine swarm-node4 Running Running 50 seconds ago
+9d021pmvnnrq webserver.3 nginx:alpine swarm-node1 Running Running 50 seconds ago
 ```
 
-We notice in this case that node2 did not receive any replica. But we can force replicas to run there.
+We notice in this case that swarm-node2 did not receive any replica. But we can force replicas to run there.
 
 
 4 - To force specific locations we can add labels to specific nodes and add constraints to nodes.
 ```
-$ docker node update --label-add tier=front node2
-node2
+$ docker node update --label-add tier=front swarm-node2
+swarm-node2
 ```
 
 And now we modify the current service.
 ```
-vagrant@node4:~$ docker service update --constraint-add node.labels.tier==front webserver
+vagrant@swarm-node4:~$ docker service update --constraint-add node.labels.tier==front webserver
 webserver
 overall progress: 3 out of 3 tasks
 1/3: running  [==================================================>]
@@ -220,23 +220,23 @@ overall progress: 3 out of 3 tasks
 verify: Service converged
 
 
-vagrant@node4:~$ docker service ps webserver
+vagrant@swarm-node4:~$ docker service ps webserver
 ID            NAME             IMAGE         NODE   DESIRED STATE   CURRENT STATE ERROR     PORTS
-wjgkgkn0ullj  webserver.1      nginx:alpine  node2    Running         Running 24 seconds ago
+wjgkgkn0ullj  webserver.1      nginx:alpine  swarm-node2    Running         Running 24 seconds ago
 wb4knzpud1z5
-               \_ webserver.1  nginx:alpine  node3    Shutdown        Shutdown 25 seconds ago
-bz2b4dw1emvw   webserver.2     nginx:alpine  node2    Running         Running 26 seconds ago
-ie9br2pblxu6   \_ webserver.2  nginx:alpine  node4    Shutdown        Shutdown 27 seconds ago
-gwzvykixd5oy   webserver.3     nginx:alpine  node2    Running         Running 28 seconds ago
-9d021pmvnnrq   \_ webserver.3  nginx:alpine  node1    Shutdown        Shutdown 29 seconds ago
+               \_ webserver.1  nginx:alpine  swarm-node3    Shutdown        Shutdown 25 seconds ago
+bz2b4dw1emvw   webserver.2     nginx:alpine  swarm-node2    Running         Running 26 seconds ago
+ie9br2pblxu6   \_ webserver.2  nginx:alpine  swarm-node4    Shutdown        Shutdown 27 seconds ago
+gwzvykixd5oy   webserver.3     nginx:alpine  swarm-node2    Running         Running 28 seconds ago
+9d021pmvnnrq   \_ webserver.3  nginx:alpine  swarm-node1    Shutdown        Shutdown 29 seconds ago
 ```
 
-Now all replicas are running on node2.
+Now all replicas are running on swarm-node2.
 
 
-5 - Now we will do some maintenance on node2. In this situation we will remove service constraint before draining node2. If we do not do that, no other node will receive workloads because they are restricted to tier=front node labels.
+5 - Now we will do some maintenance on swarm-node2. In this situation we will remove service constraint before draining swarm-node2. If we do not do that, no other node will receive workloads because they are restricted to tier=front node labels.
 ```
-vagrant@node4:~$ docker service update --constraint-rm
+vagrant@swarm-node4:~$ docker service update --constraint-rm
 node.labels.tier==front webserver
 webserver
 overall progress: 3 out of 3 tasks
@@ -248,43 +248,43 @@ verify: Service converged
 
 Execute _docker service ps webserver_ to review workloads distribution.
 ```
-vagrant@node4:~$ docker service ps webserver
+vagrant@swarm-node4:~$ docker service ps webserver
 ```
 
 Tasks did not move because tasks already satisfy service constraints (no constraint in the new situation).
 
-6 - On this step we will pause node3 and drain node2.
+6 - On this step we will pause swarm-node3 and drain swarm-node2.
 ```
-vagrant@node4:~$ docker node update --availability pause node3
-node3
+vagrant@swarm-node4:~$ docker node update --availability pause swarm-node3
+swarm-node3
 
-vagrant@node4:~$ docker node update --availability drain node2
-node2
+vagrant@swarm-node4:~$ docker node update --availability drain swarm-node2
+swarm-node2
 ```
 
 Now, let's review service replica distribution
 ```
-vagrant@node4:~$ docker service ps webserver --filter desired-state=running
+vagrant@swarm-node4:~$ docker service ps webserver --filter desired-state=running
 ID              NAME        IMAGE         NODE  DESIRED STATE  CURRENT STATE ERROR PORTS
-6z55nch0q8ai    webserver.1 nginx:alpine  node4 Running        Running 3 minutes ago
-8il59udc4iey    webserver.2 nginx:alpine  node4 Running        Running 3 minutes ago
-1y4q96hb3hik    webserver.3 nginx:alpine  node1 Running        Running 3 minutes ago
+6z55nch0q8ai    webserver.1 nginx:alpine  swarm-node4 Running        Running 3 minutes ago
+8il59udc4iey    webserver.2 nginx:alpine  swarm-node4 Running        Running 3 minutes ago
+1y4q96hb3hik    webserver.3 nginx:alpine  swarm-node1 Running        Running 3 minutes ago
 ```
 
-Notice that only node1 and node4 get some tasks because node3 is paused and we removed
-all tasks on node2.
+Notice that only swarm-node1 and swarm-node4 get some tasks because swarm-node3 is paused and we removed
+all tasks on swarm-node2.
 
 
-7 - We will remove webserver service and enable nodes node2 and node3 again.
+7 - We will remove webserver service and enable nodes swarm-node2 and swarm-node3 again.
 ```
-vagrant@node4:~$ docker service rm webserver
+vagrant@swarm-node4:~$ docker service rm webserver
 webserver
 
-vagrant@node4:~$ docker node update --availability active node2
-node2
+vagrant@swarm-node4:~$ docker node update --availability active swarm-node2
+swarm-node2
 
-vagrant@node4:~$ docker node update --availability active node3
-node3
+vagrant@swarm-node4:~$ docker node update --availability active swarm-node3
+swarm-node3
 ```
 
 ## __Lab3__: Deploy a Global Service
@@ -293,7 +293,7 @@ In this lab we will deploy a global service.
 
 1 - We learned that global services will deploy one replica on each node. Let's create one and review its distribution.
 ```
-vagrant@node4:~$ docker service create --name webserver --mode global nginx:alpine
+vagrant@swarm-node4:~$ docker service create --name webserver --mode global nginx:alpine
 4xww1in0ozy3g8q6yb6rlbidr
 overall progress: 4 out of 4 tasks
 ui67xyztnw8k: running [==================================================>]
@@ -305,47 +305,47 @@ verify: Service converged
 
 All nodes will receive their own replica.
 ```
-vagrant@node4:~$ docker service ps webserver --filter desired-state=running
+vagrant@swarm-node4:~$ docker service ps webserver --filter desired-state=running
 
 ID           NAME                                 IMAGE     NODE  DESIRED STATE      CURRENT STATE  ERROR PORTS
-0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine node3 Running  Running about a minute ago
-im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine node2 Running  Running about a minute ago
-knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine node4 Running  Running about a minute ago
-26kzify7m7xd webserver.b1t5o5x8mqbz77e9v4ihd7cec nginx:alpine node1 Running  Running about a minute ago
+0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine swarm-node3 Running  Running about a minute ago
+im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine swarm-node2 Running  Running about a minute ago
+knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine swarm-node4 Running  Running about a minute ago
+26kzify7m7xd webserver.b1t5o5x8mqbz77e9v4ihd7cec nginx:alpine swarm-node1 Running  Running about a minute ago
 ```
 
-2 - We will now drain node1 for example and review the new tasks distribution.
+2 - We will now drain swarm-node1 for example and review the new tasks distribution.
 ```
-vagrant@node4:~$ docker node update --availability drain node1
-node1
+vagrant@swarm-node4:~$ docker node update --availability drain swarm-node1
+swarm-node1
 
-vagrant@node4:~$ docker service ps webserver --filter desired-state=running
+vagrant@swarm-node4:~$ docker service ps webserver --filter desired-state=running
 
 ID           NAME                                 IMAGE      NODE  DESIRED STATE    CURRENT STATE   ERROR  PORTS
-0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine node3 Running Running 3 minutes ago
-im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine node2 Running Running 3 minutes ago
-knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine node4 Running Running 3 minutes ago
+0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine swarm-node3 Running Running 3 minutes ago
+im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine swarm-node2 Running Running 3 minutes ago
+knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine swarm-node4 Running Running 3 minutes ago
 ```
 
-None received node2 task. Because global services will only run one replica of defined service.
+None received swarm-node2 task. Because global services will only run one replica of defined service.
 
-3 - If we enable again node2, its replica will start to run again.
+3 - If we enable again swarm-node2, its replica will start to run again.
 ```
-vagrant@node4:~$ docker node update --availability active node1
-node1
+vagrant@swarm-node4:~$ docker node update --availability active swarm-node1
+swarm-node1
 
-vagrant@node4:~$ docker service ps webserver --filter desired-state=running
+vagrant@swarm-node4:~$ docker service ps webserver --filter desired-state=running
 ID            NAME                                 IMAGE      NODE   DESIRED STATE   CURRENT STATE  ERROR PORTS
-sun8lxwu6p3k webserver.b1t5o5x8mqbz77e9v4ihd7cec nginx:alpine node1 Running Running 1 second ago
-0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine node3 Running Running 5 minutes
-im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine node2 Running Running 5 minutes
-knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine node4 Running Running 5 minutes
+sun8lxwu6p3k webserver.b1t5o5x8mqbz77e9v4ihd7cec nginx:alpine swarm-node1 Running Running 1 second ago
+0jb3tolmta6u webserver.ui67xyztnw8kn6fjjezjdtwxd nginx:alpine swarm-node3 Running Running 5 minutes
+im69ybzgd879 webserver.rj3rgb9egnb256cms0zt8pqew nginx:alpine swarm-node2 Running Running 5 minutes
+knh5ntkx7b3r webserver.jw9uvjcsyg05u1slm4wu0hz6l nginx:alpine swarm-node4 Running Running 5 minutes
 
 ```
 
 4 - We will remove webserver service again to clear cluster for the next labs.
 ```
-vagrant@node4:~$ docker service rm webserver
+vagrant@swarm-node4:~$ docker service rm webserver
 webserver
 ```
 
@@ -356,7 +356,7 @@ We will quick and easy refresh a new image version of deployed and running servi
 
 1-First we created a 6 replicas webserver service.
 ```
-vagrant@node4:~$ docker service create --name webserver \
+vagrant@swarm-node4:~$ docker service create --name webserver \
 --replicas 6 --update-delay 10s --update-order start-first \
 nginx:alpine
 vpllw7cxlma7mwojdyswbkmbk
@@ -373,7 +373,7 @@ verify: Service converged
 
 2 - We update now to an specific nginx:alpine version with perl support for example.
 ```
-vagrant@node4:~$ docker service update --image nginx:alpine-perl webserver
+vagrant@swarm-node4:~$ docker service update --image nginx:alpine-perl webserver
 webserver
 
 overall progress: 6 out of 6 tasks
@@ -390,19 +390,19 @@ Update took more than 60 seconds because Swarm updated tasks one by one in 10 se
 
 New version is running now
 ```
-vagrant@node4:~$ docker service ps webserver --filter desired-state=running
+vagrant@swarm-node4:~$ docker service ps webserver --filter desired-state=running
 ID              NAME          IMAGE               NODE   DESIRED STATE    CURRENT STATE     ERROR     PORTS
-n9s6lrk8zp32    webserver.1   nginx:alpine-perl   node4  Running  Running 4 minutes ago
-68istkhse4ei    webserver.2   nginx:alpine-perl   node1  Running  Running 5 minutes ago
-j6pqig7njhdw    webserver.3   nginx:alpine-perl   node1  Running  Running 6 minutes ago
-k4vlmeb56kys    webserver.4   nginx:alpine-perl   node2  Running  Running 5 minutes ago
-k50fxl1gms44    webserver.5   nginx:alpine-perl   node3  Running  Running 5 minutes ago
-apur3w3nq95m    webserver.6   nginx:alpine-perl   node3  Running  Running 5 minutes ago
+n9s6lrk8zp32    webserver.1   nginx:alpine-perl   swarm-node4  Running  Running 4 minutes ago
+68istkhse4ei    webserver.2   nginx:alpine-perl   swarm-node1  Running  Running 5 minutes ago
+j6pqig7njhdw    webserver.3   nginx:alpine-perl   swarm-node1  Running  Running 6 minutes ago
+k4vlmeb56kys    webserver.4   nginx:alpine-perl   swarm-node2  Running  Running 5 minutes ago
+k50fxl1gms44    webserver.5   nginx:alpine-perl   swarm-node3  Running  Running 5 minutes ago
+apur3w3nq95m    webserver.6   nginx:alpine-perl   swarm-node3  Running  Running 5 minutes ago
 ```
 
 3 - We will remove webserver service again to clear cluster for the next labs.
 ```
-vagrant@node4:~$ docker service rm webserver
+vagrant@swarm-node4:~$ docker service rm webserver
 webserver
 ```
 
@@ -412,7 +412,7 @@ In this lab we will deploy a PostgreSQL database using secrets, configurations a
 
 1 - We will first create secrets for required PostgreSQL admin user password using _docker service create_:
 ```
-vagrant@node4:~$ echo SuperSecretPassword|docker secret create postgres_password -
+vagrant@swarm-node4:~$ echo SuperSecretPassword|docker secret create postgres_password -
 u21mmo1zoqqguh01u8guys9gt
 ```
 
@@ -431,29 +431,29 @@ EOSQL
 ```
 We will add execute permissions:
 ```
-vagrant@node4:~$ chmod 755 create-docker-database.sh
+vagrant@swarm-node4:~$ chmod 755 create-docker-database.sh
 
-vagrant@node4:~$ ls -lrt create-docker-database.sh
+vagrant@swarm-node4:~$ ls -lrt create-docker-database.sh
 -rwxr-xr-x 1 vagrant vagrant 219 Jan 1 20:00 create-docker-database.sh
 ```
 
 We will then create a config file with file content. We will use this file to create a database named _docker_ on PostgreSQL start. This is something we can use because it is provided by official Docker Hub PostgreSQL image.
 ```
-vagrant@node4:~$ docker config create create-docker-database ./create-docker-database.sh
+vagrant@swarm-node4:~$ docker config create create-docker-database ./create-docker-database.sh
 uj6zvrdq0682anzr0kobbyhk2
 ```
 
-3 - We will add a label on some of the nodes to ensure database is running always there as we will create an external volume only on that node. We will use for example _node2_.
+3 - We will add a label on some of the nodes to ensure database is running always there as we will create an external volume only on that node. We will use for example _swarm-node2_.
 ```
-$ vssh node2
-vagrant@node2:~$ docker volume create PGDATA
+$ vagrant ssh swarm-node2
+vagrant@swarm-node2:~$ docker volume create PGDATA
 PGDATA
 ```
 
-This volume will only exist on node2 therefore we will create a constraint based on a node label to run service task only on _node2_.
+This volume will only exist on swarm-node2 therefore we will create a constraint based on a node label to run service task only on _swarm-node2_.
 ```
-vagrant@node4:~$ docker node update --label-add tier=database node2
-node2
+vagrant@swarm-node4:~$ docker node update --label-add tier=database swarm-node2
+swarm-node2
 ```
 
 4 - Now we will create following Docker Compose file named postgres-stack.yaml:
@@ -513,29 +513,29 @@ networks:
 
 5 - We deploy postgres stack using docker stack deploy:
 ```
-vagrant@node4:~$ docker stack deploy -c postgres-stack.yaml postgres
+vagrant@swarm-node4:~$ docker stack deploy -c postgres-stack.yaml postgres
 Creating network postgres_net
 Creating service postgres_database
 ```
 
 We easely review stack status
 ```
-vagrant@node4:~$ docker stack ps postgres
+vagrant@swarm-node4:~$ docker stack ps postgres
 ID NAME IMAGE NODE DESIRED STATE CURRENT STATE ERROR PORTS
-53in2mik27r0 postgres_database.1 postgres:alpine node2 Running Running 19 seconds ago
+53in2mik27r0 postgres_database.1 postgres:alpine swarm-node2 Running Running 19 seconds ago
 ```
 
-It is running on node2 as we expected.
+It is running on swarm-node2 as we expected.
 
 6 - We published port 5432 on port 15432. We can connect to this port from any node IP address in the cluster because Swarm uses Routing Mesh.
 ```
-vagrant@node4:~$ curl 0.0.0.0:15432
+vagrant@swarm-node4:~$ curl 0.0.0.0:15432
 curl: (52) Empty reply from server
 
-vagrant@node2:~$ curl 0.0.0.0:15432
+vagrant@swarm-node2:~$ curl 0.0.0.0:15432
 curl: (52) Empty reply from server
 
-vagrant@node3:~$ curl 0.0.0.0:15432
+vagrant@swarm-node3:~$ curl 0.0.0.0:15432
 curl: (52) Empty reply from server
 ```
 
@@ -543,14 +543,14 @@ We get this response to curl because we are not using the right client. Let's ru
 
 7 - We now run a simple alpine container attached to stack deployed network, in this example it is _postgres_net_.
 ```
-vagrant@node4:~$ docker network ls --filter name=postgres_net
+vagrant@swarm-node4:~$ docker network ls --filter name=postgres_net
 NETWORK ID    NAME         DRIVER   SCOPE
 mh53ek97pi3a  postgres_net overlay  swarm
 ```
 
 We run a simple alpine container and we install postgresql-client package.
 ```
-vagrant@node4:~$ docker container run -ti --network postgres_net alpine
+vagrant@swarm-node4:~$ docker container run -ti --network postgres_net alpine
 Unable to find image 'alpine:latest' locally
 latest: Pulling from library/alpine
 e6b0cf9c0882: Pull complete
@@ -606,14 +606,14 @@ postgres=#
 
 We listed the deployed databases using "\l" and "docker" database, created with our initialization script was created. Notice that we used default PostgreSQL database port 5432 (we omitted any port customization on client request), instead of 15432. This is because docker container was connecting internally. Both, postgres_database.1 task and externally run container, are using the same network, postgres_net.
 
-We will exit running container and remove the postgres stack and node2 volume for next labs.
+We will exit running container and remove the postgres stack and swarm-node2 volume for next labs.
 ```
 postgres=# exit
 / # exit
 ```
 Then we will remove deployed stack:
 ```
-vagrant@node4:~$ docker stack rm postgres
+vagrant@swarm-node4:~$ docker stack rm postgres
 Removing service postgres_database
 Removing network postgres_net
 ```
@@ -626,7 +626,7 @@ We will use codegazers/colors:1.13 image. This is a simple application that will
 
 1 - Let's create a service named _colors_ based on _codegazers/colors:1.13_ image. We will not set any color using environment variables so random ones will be choosen.
 ```
-vagrant@node4:~$ docker service create --name colors \
+vagrant@swarm-node4:~$ docker service create --name colors \
 --publish 8000:3000 \
 --constraint node.role==worker \
 codegazers/colors:1.13
@@ -635,11 +635,11 @@ overall progress: 1 out of 1 tasks
 1/1: running [==================================================>]
 verify: Service converged
 ```
-We chose not run any replica on manager node because we will use _curl_ from _node4_ on this lab.
+We chose not run any replica on manager node because we will use _curl_ from _swarm-node4_ on this lab.
 
-2 - Let's test connectivity from manager node4.
+2 - Let's test connectivity from manager swarm-node4.
 ```
-vagrant@node4:~$ curl 0.0.0.0:8000/text
+vagrant@swarm-node4:~$ curl 0.0.0.0:8000/text
 APP_VERSION: 1.0
 COLOR: orange
 CONTAINER_NAME: d3a886d5fe34
@@ -652,13 +652,13 @@ We deployed one replica and it is running "orange" color. Notice container IP ad
 
 3 - Let's run 5 more replicas.
 ```
-vagrant@node4:~$ docker service update --replicas 6 colors --quiet
+vagrant@swarm-node4:~$ docker service update --replicas 6 colors --quiet
 colors
 ```
 
 4 - If we test again service port 8080, we will get different colors as containers were launched without color settings.
 ```
-vagrant@node4:~$ curl 0.0.0.0:8000/text
+vagrant@swarm-node4:~$ curl 0.0.0.0:8000/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: 64fb2a3009b2
@@ -666,7 +666,7 @@ CONTAINER_IP: 10.0.0.12 172.18.0.4
 CLIENT_IP: ::ffff:10.0.0.5
 CONTAINER_ARCH: linux
 
-vagrant@node4:~$ curl 0.0.0.0:8000/text
+vagrant@swarm-node4:~$ curl 0.0.0.0:8000/text
 APP_VERSION: 1.0
 COLOR: cyan
 CONTAINER_NAME: 73b07ee0c287
@@ -689,13 +689,13 @@ In this lab we will review service endpoint modes and how DNS resolve vip and dn
 
 1 - We create attachable overaly "test" network.
 ```
-vagrant@node4:~$ docker network create --attachable -d overlay test
+vagrant@swarm-node4:~$ docker network create --attachable -d overlay test
 32v9pibk7cqfseknretmyxfsw
 ```
 
 2 - Now we will create 2 different "colors" services. Each one will use different endpoint modes.
 ```
-vagrant@node4:~$ docker service create --replicas 2 \
+vagrant@swarm-node4:~$ docker service create --replicas 2 \
 --name colors-vip --network test \
 --quiet codegazers/colors:1.13
 4m2vvbnqo9wgf8awnf53zr5b2
@@ -703,7 +703,7 @@ vagrant@node4:~$ docker service create --replicas 2 \
 
 And another one for dnsrr
 ```
-vagrant@node4:~$ docker service create --replicas 2 \
+vagrant@swarm-node4:~$ docker service create --replicas 2 \
 --name colors-dnsrr --network test \
 --quiet --endpoint-mode dnsrr
 codegazers/colors:1.13
@@ -712,7 +712,7 @@ wqpv929pe5ehniviclzkdvcl0
 
 3 - Now run a simple alpine container on _test_ network and verify name resolution. We will install _bind-tools_ package to be able to use _host_ and _nslookup_ tools.
 ```
-vagrant@node4:~$ docker run -ti --rm --network test alpine
+vagrant@swarm-node4:~$ docker run -ti --rm --network test alpine
 / # apk add --update --no-cache bind-tools --quiet
 / # host colors-vip
 colors-vip has address 10.0.4.2
@@ -731,7 +731,7 @@ On the other hand, using __dnsrr__ endpoint will not provide any virtual IP addr
 We can also take a look at containers attached to _test_"_ network. These will get one internal IP address and one that will be routed on overlay network. We have just launched an _ip
 add show_"_ command attached to one of the running _colors-dnsrr_"_ task containers.
 ```
-vagrant@node4:~$ docker exec -ti colors-dnsrr.1.vtmpdf0w82daq6fdyk0wwzqc7
+vagrant@swarm-node4:~$ docker exec -ti colors-dnsrr.1.vtmpdf0w82daq6fdyk0wwzqc7
 ip add show
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1
   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
