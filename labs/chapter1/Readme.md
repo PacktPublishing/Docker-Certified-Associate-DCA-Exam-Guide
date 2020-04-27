@@ -7,7 +7,12 @@
 >NOTE:
 >
 >You can use your own host (laptop or server), we provide you mock environments to avoid any change in your system. 
-
+>All labs an be executed on the "standalone" environment, therefore we will connect to this node using _vagrant ssh_:
+>
+>```
+>$ vagrant ssh standalone
+>vagrant@standalone:~$
+>```
 ---
 
 ### Following labs can be found under labs/chapter1 directory.
@@ -20,38 +25,38 @@ This lab will guide you through docker runtime installation steps and running yo
 
 1 - To ensure that no previous versions are installed, we will remove any docker* package.
 ```
-$ sudo yum remove docker*
+vagrant@standalone:~$ sudo yum remove docker*
 ```
 
 
 2 - Add the required packages by running the following command:
 ```
-$ sudo yum install -y yum-utils \
+vagrant@standalone:~$ sudo yum install -y yum-utils \
  device-mapper-persistent-data \
  lvm2
 ```
 
 3 - We will use stable release so we will add its package repository as follows:
 ```
-$ sudo yum-config-manager \
+vagrant@standalone:~$ sudo yum-config-manager \
 --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 ```
 
 4 - We now install docker packages and containerd. We are installing server and client on this host (since version 18.06, docker provides different packages for docker-cli and docker daemon).
 ```
-$ sudo yum install -y docker-ce docker-ce-cli containerd.io
+vagrant@standalone:~$ sudo yum install -y docker-ce docker-ce-cli containerd.io
 ```
 
 5 - Docker is installed but on Red Hat like operating systems, it is not enabled on boot by default and will not be started. We will verify this situation and we will enable and start docker service.
 ```
-$ sudo systemctl is-active docker
-$ sudo systemctl enable docker
-$ sudo systemctl start docker
+vagrant@standalone:~$ sudo systemctl is-active docker
+vagrant@standalone:~$ sudo systemctl enable docker
+vagrant@standalone:~$ sudo systemctl start docker
 ```
 
 6 - Now that Docker is installed and running, we can run our first container.
 ```
-$ sudo docker container run hello-world
+vagrant@standalone:~$ sudo docker container run hello-world
 
 Unable to find image 'hello-world:latest' locally
 latest: Pulling from library/hello-world
@@ -75,13 +80,13 @@ For more examples and ideas, visit: https://docs.docker.com/get-started/
 
 7 - As you should have noticed, we are always using sudo to root, because our user has not got access to docker unix socket. This is the first security layer an attacker must pass on your system. We usually enable a user to run containers in production environments because we want to isolate operating system responsibilities and management from Docker. Just add our user to the docker group or add a new group of users with access to the socket. In this case, we will just add our lab user to the docker group.
 ```
-$ docker container ls
+vagrant@standalone:~$ docker container ls
 Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.40/containers/json : dial unix /var/run/docker.sock: connect: permission denied
 
-$ sudo usermod -a -G docker $USER
-$ newgrp docker
+vagrant@standalone:~$ sudo usermod -a -G docker $USER
+vagrant@standalone:~$ newgrp docker
 
-$ docker container ls -a
+vagrant@standalone:~$ docker container ls -a
 CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 5f7abd49b3e7 hello-world "/hello" 19 minutes ago Exited (0) 19 minutes ago festive_feynman
 ```
@@ -92,7 +97,7 @@ In this lab, we are going to review what we learned about process isolation and 
 
 1 - Take a quick review of Docker systemd daemon.
 ```
-$ sudo systemctl status docker
+vagrant@standalone:~$ sudo systemctl status docker
 ● docker.service - Docker Application Container Engine
 Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled;
 vendor preset: disabled)
@@ -121,7 +126,7 @@ This output shows that the service is using a default systemd unit configuration
 2 - We notice that dockerd uses a separate containerd process to execute containers. Let's
 run some container on background and review their processes. We will run a simple alpine with an nginx daemon.
 ```
-$ docker run -d nginx:alpine
+vagrant@standalone:~$ docker run -d nginx:alpine
 Unable to find image 'nginx:alpine' locally
 alpine: Pulling from library/nginx
 9d48c3bd43c5: Already exists
@@ -134,7 +139,7 @@ dcda734db454a6ca72a9b9eef98aae6aefaa6f9b768a7d53bf30665d8ff70fe7
 
 3 - Now we will look for nginx and containerd processes (process ids will be completely different on your system, just understand the workflow)
 ```
-$ ps -efa|grep -v grep|egrep -e containerd -e nginx
+vagrant@standalone:~$ ps -efa|grep -v grep|egrep -e containerd -e nginx
 root  15755  1 0 sep27 ?  00:00:42 /usr/bin/containerd
 root  20407  1 0 19:34 ?  00:00:02 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
 root  20848 15755 0 20:06 ?  00:00:00 containerd-shim - namespace moby -workdir /var/lib/containerd/io.containerd.runtime.v1.linux/moby/dcda734db454a6ca72a9 b9eef98aae6aefaa6f9b768a7d53bf30665d8ff70fe7 -address /run/containerd/containerd.sock -containerd-binary /usr/bin/containerd -runtime-root /var/run/docker/runtime-runc
@@ -144,7 +149,7 @@ root  20863 20848 0 20:06 ? 00:00:00 nginx: master process nginx -g daemon off;
 
 4 -We notice that at the end, container started from 20848 pid. Following runtime-runc location we discover state.json, which is the container state file.
 ```
-$ sudo ls -laRt /var/run/docker/runtime-runc/moby
+vagrant@standalone:~$ sudo ls -laRt /var/run/docker/runtime-runc/moby
 /var/run/docker/runtime-runc/moby:
 total 0
 drwx--x--x. 2 root root 60 sep 28 20:06 dcda734db454a6ca72a9b9eef98aae6aefaa6f9b768a7d53bf30665d8ff70fe7
@@ -162,7 +167,7 @@ capabilities applied, resources, etc..
 
 5 - Our nginx server runs under 20863 pid and nginx child process with pid 20901 on docker host, but let's take a look inside.
 ```
-$ docker container exec dcda734db454 ps -ef
+vagrant@standalone:~$ docker container exec dcda734db454 ps -ef
 PID USER TIME COMMAND
 1 root 0:00 nginx: master process nginx -g daemon off;
 6 nginx 0:00 nginx: worker process
@@ -175,7 +180,7 @@ We can run other containers using the same image and we will obtain same results
 6 - Let's take a look at nginx process namespaces.
 So we confirm that our nginx container is running using different namespaces that provides complete network, processes, mounts, filesystem and time isolation.
 ```
-$ sudo lsns
+vagrant@standalone:~$ sudo lsns
 NS         TYPE NPROCS  PID    USER COMMAND
 4026532197 mnt  2       20863  root  nginx: master process nginx -g daemon off
 4026532198 uts  2       20863  root  nginx: master process nginx -g daemon off
@@ -194,7 +199,7 @@ This lab will cover seccopm capabilities management. We will launch containers u
 
 1- We will first run a container using default allowed capabilities. During the execution ofthis alpine container, we will change the ownership of /etc/passwd file.
 ```
-$ docker container run --rm -it alpine sh -c "chown nobody /etc/passwd; ls -l /etc/passwd"
+vagrant@standalone:~$ docker container run --rm -it alpine sh -c "chown nobody /etc/passwd; ls -l /etc/passwd"
 -rw-r--r-- 1 nobody root 1230 Jun 17 09:00 /etc/passwd
 ```
 
@@ -202,7 +207,7 @@ As we can see, there is nothing to stop changing whatever file ownership insidec
 
 2 - Let's drop all capabilities and see what happens.
 ```
-$ docker container run --rm -it --cap-drop=ALL alpine sh -c "chown nobody /etc/passwd; ls -l /etc/passwd"
+vagrant@standalone:~$ docker container run --rm -it --cap-drop=ALL alpine sh -c "chown nobody /etc/passwd; ls -l /etc/passwd"
 chown: /etc/passwd: Operation not permitted
 -rw-r--r-- 1 root root 1230 Jun 17 09:00 /etc/passwd
 ```
@@ -211,6 +216,6 @@ We notice that operation was forbiden. As container runs without any capabilitie
 
 3 -Now we just add CHOWN capability to allow again to change ownership of files inside the container.
 ```
-$ docker container run --rm -it --cap-drop=ALL --cap-add CHOWN alpine sh -c "chown nobody /etc/passwd; ls -l /etc/passwd"
+vagrant@standalone:~$ docker container run --rm -it --cap-drop=ALL --cap-add CHOWN alpine sh -c "chown nobody /etc/passwd; ls -l /etc/passwd"
 -rw-r--r-- 1 nobody root 1230 Jun 17 09:00 /etc/passwd
 ```

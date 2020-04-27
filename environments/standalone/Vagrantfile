@@ -36,24 +36,21 @@ update_hosts = <<SCRIPT
 SCRIPT
 
 
-deb_install_common_software  = <<SCRIPT
-  systemctl stop apt-daily.timer
-  systemctl disable apt-daily.timer
-  sed -i '/Update-Package-Lists/ s/1/0/' /etc/apt/apt.conf.d/10periodic
-  sudo killall apt apt-get
-  while true;do fuser -vki /var/lib/apt/lists/lock || break ;done
-  DEBIAN_FRONTEND=noninteractive apt-get update -qq \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -qq \
+####### REDHAT-like
+
+rhn_disable_autoupdates = <<SCRIPT
+  systemctl stop packagekit
+  systemctl mask packagekit
+SCRIPT
+
+rh_install_common_software  = <<SCRIPT
+  systemctl stop packagekit
+  systemctl mask packagekit
+  yum install -y -q -e 0 \
   ntpdate \
   ntp \
   python \
   && timedatectl set-timezone Europe/Madrid
-SCRIPT
-
-deb_disable_autoupdates = <<SCRIPT
-    echo 'APT::Periodic::Enable \"0\";' > /etc/apt/apt.conf.d/02periodic
-    systemctl disable apt-daily.service
-    systemctl disable apt-daily.timer
 SCRIPT
 
 Vagrant.configure(2) do |config|
@@ -92,16 +89,11 @@ Vagrant.configure(2) do |config|
       config.vm.network "private_network",
         ip: node['hostonly_ip']
 
-      config.vm.provision "disable-apt-periodic-updates", type: "shell" do |s|
-    	s.privileged = true
-    	s.inline = "echo 'APT::Periodic::Enable \"0\";' > /etc/apt/apt.conf.d/02periodic"
-      end
+       config.vm.provision :shell, :inline => update_hosts
 
-      config.vm.provision :shell, :inline => update_hosts
+      config.vm.provision :shell, :inline => rhn_disable_autoupdates
 
-      config.vm.provision :shell, :inline => deb_disable_autoupdates
-
-      config.vm.provision :shell, :inline => deb_install_common_software
+      config.vm.provision :shell, :inline => rh_install_common_software
 
     end
 

@@ -19,9 +19,9 @@
 We will run a simple application that will show us a different color using variables. We will be able to review container's IP address and hostname. We will use docker-compose hence it must be installed. This is explained in the book. If you are using "Standalone" Environment, you are usin a Linux node for the labs and you can follow these instructions:
 
 ```
-$ sudo curl -L --fail https://github.com/docker/compose/releases/download/1.24.1/run.sh -o /usr/local/bin/docker-compose
+vagrant@standalone:~$ sudo curl -L --fail https://github.com/docker/compose/releases/download/1.24.1/run.sh -o /usr/local/bin/docker-compose
 
-$ sudo chmod +x /usr/local/bin/docker-compose
+vagrant@standalone:~$ sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 1 - In this first lab we will run a random color application using [docker-compose.random.yaml](./docker-compose.random.yaml). This is the content of this file:
@@ -44,7 +44,7 @@ It is very simple. We defined "random" service using the code contained in "app"
 
 2 - We will now build images using "lab1" as project name. Notice that we defined "lab" network. Docker daemon will create "lab1_random" image and "lab1_lab" network.
 ```
-$ docker-compose -p lab1 -f docker-compose.random.yaml build
+vagrant@standalone:~$ docker-compose -p lab1 -f docker-compose.random.yaml build
 Building random
 Step 1/9 : FROM node:alpine
 alpine: Pulling from library/node
@@ -80,11 +80,11 @@ Successfully tagged lab1_random:latest
 
 3 - Now we execute our multi-container application (in this case we just have one service definition).
 ```
-$ docker-compose -p lab1 -f docker-compose.random.yaml up -d
+vagrant@standalone:~$ docker-compose -p lab1 -f docker-compose.random.yaml up -d
 Creating network "lab1_lab" with the default driver
 Creating lab1_random_1 ... done
 Let's review the docker-compose project "lab1" execution:
-$ docker-compose -p lab1 -f docker-compose.random.yaml ps
+vagrant@standalone:~$ docker-compose -p lab1 -f docker-compose.random.yaml ps
 Name Command State Ports
 --------------------------------------------------------------------------------
 lab1_random_1 docker-entrypoint.sh node ... Up 0.0.0.0:32780->3000/tcp
@@ -92,7 +92,7 @@ lab1_random_1 docker-entrypoint.sh node ... Up 0.0.0.0:32780->3000/tcp
 
 4 - We notice that application's port 3000 is linked to Docker host port 32780 (using NAT). Therefore we can access application via that random port:
 ```
-$ curl 0.0.0.0:32780/text
+vagrant@standalone:~$ curl 0.0.0.0:32780/text
 APP_VERSION: 1.0
 COLOR: blue
 CONTAINER_NAME: 17bc24f60799
@@ -105,7 +105,7 @@ CONTAINER_ARCH: linux
 
 6 - We can now remove the application and continue to next lab using _docker-compose down_.
 ```
-$ docker-compose -p lab1 -f docker-compose.random.yaml down
+vagrant@standalone:~$ docker-compose -p lab1 -f docker-compose.random.yaml down
 Stopping lab1_random_1 ... done
 Removing lab1_random_1 ... done
 Removing network lab1_lab
@@ -139,7 +139,7 @@ networks:
 
 2 - Building will not create new layers because we have not change any code. We will simply use _docker-compose up -d_.
 ```
-$ docker-compose -p lab2 -f docker-compose.red.yaml up -d
+vagrant@standalone:~$ docker-compose -p lab2 -f docker-compose.red.yaml up -d
 Creating network "lab2_lab" with the default driver
 Building red
 Step 1/9 : FROM node:alpine
@@ -166,7 +166,7 @@ Creating lab2_red_1 ... done
 
 3 - We can review deployment status using docker-compose ps.
 ```
-$ docker-compose -p lab2 -f docker-compose.red.yaml ps
+vagrant@standalone:~$ docker-compose -p lab2 -f docker-compose.red.yaml ps
 Name Command State Ports
 ---------------------------------------------------------------------------
 --
@@ -175,7 +175,7 @@ lab2_red_1 docker-entrypoint.sh node ... Up 0.0.0.0:32781->3000/tcp
 
 4 - We can easily access 0.0.0.0:32781 to get "red" application using curl.
 ```
-$ curl 0.0.0.0:32781/text
+vagrant@standalone:~$ curl 0.0.0.0:32781/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: fc05e400d02a
@@ -190,7 +190,7 @@ Let's try now to scale up the number of application instances.
 
 1 - We will just set the new number of instances required for the application using _docker-compose scale_.
 ```
-$ docker-compose -p lab3 -f docker-compose.red.yaml scale red=5
+vagrant@standalone:~$ docker-compose -p lab3 -f docker-compose.red.yaml scale red=5
 WARNING: The scale command is deprecated. Use the up command with the --
 scale flag instead.
 Starting lab3_red_1 ... done
@@ -202,7 +202,7 @@ Creating lab3_red_5 ... done
 
 2 - Notice that in this case we are deploying a staless application, without any persistency. There is something else in this case, we left unset the host linked port. Therefore a random one is always used for each container instance. Let's review new instance number with _docker-compose ps_.
 ```
-$ docker-compose -p lab3 -f docker-compose.red.yaml ps
+vagrant@standalone:~$ docker-compose -p lab3 -f docker-compose.red.yaml ps
 Name Command State Ports
 -----------------------------------------------------------------------------
 lab3_red_1 docker-entrypoint.sh node ... Up 0.0.0.0:32781->3000/tcp
@@ -214,7 +214,7 @@ lab3_red_5 docker-entrypoint.sh node ... Up 0.0.0.0:32782->3000/tcp
 
 3 - Now we can access all instances. Each one using its own NAT port available in the Docker host. We can check again using curl (use curl on a loop or just run it 10 times):
 ```
-$ curl 0.0.0.0:32781/text
+vagrant@standalone:~$ curl 0.0.0.0:32781/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: fc05e400d02a
@@ -223,7 +223,7 @@ CLIENT_IP: ::ffff:172.29.0.1
 CONTAINER_ARCH: linux
 
 
-$ curl 0.0.0.0:32782/text
+vagrant@standalone:~$ curl 0.0.0.0:32782/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: f5de33465357
@@ -232,7 +232,7 @@ CLIENT_IP: ::ffff:172.29.0.1
 CONTAINER_ARCH: linux
 
 
-$ curl 0.0.0.0:32783/text
+vagrant@standalone:~$ curl 0.0.0.0:32783/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: 5be016aadadb
@@ -241,7 +241,7 @@ CLIENT_IP: ::ffff:172.29.0.1
 CONTAINER_ARCH: linux
 
 
-$ curl 0.0.0.0:32784/text
+vagrant@standalone:~$ curl 0.0.0.0:32784/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: 413c9d605bd5
@@ -250,7 +250,7 @@ CLIENT_IP: ::ffff:172.29.0.1
 CONTAINER_ARCH: linux
 
 
-$ curl 0.0.0.0:32785/text
+vagrant@standalone:~$ curl 0.0.0.0:32785/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: fe879a59c3aa
@@ -263,7 +263,7 @@ All IP addresses are different because we are accessing different containers. Bu
 
 4 - Let's remove all application instances.
 ```
-$ docker-compose -p lab3 -f docker-compose.red.yaml down
+vagrant@standalone:~$ docker-compose -p lab3 -f docker-compose.red.yaml down
 Stopping lab3_red_2  ... done
 Stopping lab3_red_3  ... done
 Stopping lab3_red_4 ... done
@@ -322,7 +322,7 @@ networks:
 
 2 - We will launch "red", "green" and "white" applications using _docker-compose up_.
 ```
-$ docker-compose -p lab4 -f docker-compose.multicolor.yaml up -d
+vagrant@standalone:~$ docker-compose -p lab4 -f docker-compose.multicolor.yaml up -d
 Creating network "lab4_lab" with the default driver
 Building white
 Step 1/9 : FROM node:alpine
@@ -346,14 +346,14 @@ Creating lab4_red_1 ... done
 
 3 - We will be able to access different applications. Let's review their processes and ports using _docker-compose ps_ and then access each instance using _curl_.
 ```
-$ docker-compose -p lab4 -f docker-compose.multicolor.yaml ps
+vagrant@standalone:~$ docker-compose -p lab4 -f docker-compose.multicolor.yaml ps
 Name Command State Ports
 -------------------------------------------------------------------------------
 lab4_green_1 docker-entrypoint.sh node ... Up 0.0.0.0:32789->3000/tcp
 lab4_red_1 docker-entrypoint.sh node ... Up 0.0.0.0:32791->3000/tcp
 lab4_white_1 docker-entrypoint.sh node ... Up 0.0.0.0:32790->3000/tcp
 
-$ curl 0.0.0.0:32789/text
+vagrant@standalone:~$ curl 0.0.0.0:32789/text
 APP_VERSION: 1.0
 COLOR: green
 CONTAINER_NAME: a25a4cc36232
@@ -361,7 +361,7 @@ CONTAINER_IP: 172.31.0.2
 CLIENT_IP: ::ffff:172.31.0.1
 CONTAINER_ARCH: linux
 
-$ curl 0.0.0.0:32791/text
+vagrant@standalone:~$ curl 0.0.0.0:32791/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: 5e12b0de196c
@@ -369,7 +369,7 @@ CONTAINER_IP: 172.31.0.4
 CLIENT_IP: ::ffff:172.31.0.1
 CONTAINER_ARCH: linux
 
-$ curl 0.0.0.0:32790/text
+vagrant@standalone:~$ curl 0.0.0.0:32790/text
 APP_VERSION: 1.0
 COLOR: white
 CONTAINER_NAME: b67b09c8c836
@@ -437,7 +437,7 @@ networks:
 
 2 - We will launch application deployment and review the results using _docker-compose-d up_.
 ```
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml up -d
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml up -d
 Creating network "lab5_lab" with the default driver
 Building white
 ...
@@ -464,7 +464,7 @@ Creating lab5_green_1 ... done
 
 3 - Once all components are ready, we can test all color backends using differnet host headers to reach each backend. We prepared a simple nginx load balancing configuration (take a quick review of load balancer configuration file in lb/nginx.conf). Everytime we ask for an specific host header using each color, we will be routed to the right backend.
 ```
-$ cat lb/nginx.conf
+vagrant@standalone:~$ cat lb/nginx.conf
 ...
 ...
 server {
@@ -481,7 +481,7 @@ proxy_pass http://$host:$port;
 
 4 - Using curl we can test all backends.
 ```
-$ curl -H "Host: white" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: white" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: white
 CONTAINER_NAME: 86871cba5a71
@@ -489,7 +489,7 @@ CONTAINER_IP: 192.168.208.5
 CLIENT_IP: ::ffff:192.168.208.4
 CONTAINER_ARCH: linux
 
-$ curl -H "Host: green" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
 CONTAINER_NAME: f7d90dc89255
@@ -497,7 +497,7 @@ CONTAINER_IP: 192.168.208.2
 CLIENT_IP: ::ffff:192.168.208.4
 CONTAINER_ARCH: linux
 
-$ curl -H "Host: red" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: red" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: red
 CONTAINER_NAME: 25bb1b66bab8
@@ -508,7 +508,7 @@ CONTAINER_ARCH: linux
 
 5 - Remember, none of the services is accessible but loadbalancer. Let's review published ports using _docker-compose ps_.
 ```
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml ps
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml ps
 Name Command State Ports
 -----------------------------------------------------------------------------------
 lab5_green_1 docker-entrypoint.sh node ... Up 3000/tcp
@@ -519,7 +519,7 @@ lab5_white_1 docker-entrypoint.sh node ... Up 3000/tcp
 
 6 - What will happen if we now scale up the "green" service to 4 instances?. We expect to reach all instances because service instances will be added to internal DNS. Let's scale up this service using _docker-compose up -d_.
 ```
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml up -d --scale green=4
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml up -d --scale green=4
 Starting lab5_green_1 ...
 lab5_white_1 is up-to-date
 lab5_red_1 is up-to-date
@@ -531,7 +531,7 @@ Creating lab5_green_4 ... done
 
 7 - Let's ask for the "green" service again using _curl_ a couple of times.
 ```
-$ curl -H "Host: green" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
 CONTAINER_NAME: ba90c57914f9
@@ -539,7 +539,7 @@ CONTAINER_IP: 192.168.208.7
 CLIENT_IP: ::ffff:192.168.208.4
 CONTAINER_ARCH: linux
 
-$ curl -H "Host: green" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
 CONTAINER_NAME: c1a9ebcf82ac
@@ -547,7 +547,7 @@ CONTAINER_IP: 192.168.208.6
 CLIENT_IP: ::ffff:192.168.208.4
 CONTAINER_ARCH: linux
 
-$ curl -H "Host: green" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
 CONTAINER_NAME: d5436822ca8f
@@ -555,7 +555,7 @@ CONTAINER_IP: 192.168.208.8
 CLIENT_IP: ::ffff:192.168.208.4
 CONTAINER_ARCH: linux
 
-$ curl -H "Host: green" 0.0.0.0:8080/text
+vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
 CONTAINER_NAME: f7d90dc89255
@@ -568,12 +568,12 @@ As we expected, we get different backends on each request because DNS gave load 
 
 8 - To fininsh this lab let's install "bind-tools" on loadbalancer container and query internal DNS using _host_ tool. We will query _red_ and _green_ services. We will use docker-compose exec to install _bin-tools_ package in loadbalancer container. Once package is installed, we will use _docker-compose exec_ again with _host_ command to query DNS.
 ```
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer apk add -q --update bind-tools
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer apk add -q --update bind-tools
 
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer host red
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer host red
 red has address 192.168.208.3
 
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer host green
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer host green
 green has address 192.168.208.8
 green has address 192.168.208.2
 green has address 192.168.208.7
@@ -584,5 +584,5 @@ Internal DNS gave us all the IP addresses associated with _green_ and _red_ serv
 
 9 - Remove all labs using _docker-compose down_ with the appropiate docker-compose file and project name.
 ```
-$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml down
+vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml down
 ```

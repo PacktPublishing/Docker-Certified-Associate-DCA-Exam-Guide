@@ -65,29 +65,29 @@ CMD ["python", "app.py"]
 
 5 - Let's build our application image (simpleapp:v1.0):
 ```
-$ docker image build -q -t simpleapp:v1.0 .
+vagrant@standalone:~$ docker image build -q -t simpleapp:v1.0 .
 sha256:1cf398d39b51eb7644f98671493767267be108b60c3142b3ca9e0991b4d3e45b
 ```
 
 6 - We can run this simple application executing a detached container and exposing 5000 port.
 ```
-$ docker container run -d --name v1.0 simpleapp:v1.0
+vagrant@standalone:~$ docker container run -d --name v1.0 simpleapp:v1.0
 1e775843a42927c25ee350af052f3d8e34c0d26f2510fb2d85697094937f574f
 ```
 
 7 - We can review container's IP address. We are running container in a host, consequently we can access process port and defined IP address:
 ```
-$ docker container ls --filter name=v1.0
+vagrant@standalone:~$ docker container ls --filter name=v1.0
 CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
 1e775843a429 simpleapp:v1.0 "python app.py" 35 seconds ago
 
-$ docker container inspect v1.0 --format "{{.NetworkSettings.Networks.bridge.IPAddress }}"
+vagrant@standalone:~$ docker container inspect v1.0 --format "{{.NetworkSettings.Networks.bridge.IPAddress }}"
 172.17.0.6
 ```
 
 8 - We can access our application as expected using defined IP and port.
 ```
-$ curl http://172.17.0.6:5000
+vagrant@standalone:~$ curl http://172.17.0.6:5000
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,13 +104,13 @@ $ curl http://172.17.0.6:5000
 9 - It is simple to change index.html if we get into container. The problem is that as we run a new container, changes will not be stored and _index.html_ will be the same as defined on base image.
 As a result, if we want changes to persist, we need to use volumes. Let's use a bind mount to change _index.html_ while container is running.
 ```
-$ docker container run -d --name v1.0-bindmount -v $(pwd)/templates:/app/templates simpleapp:v1.0
+vagrant@standalone:~$ docker container run -d --name v1.0-bindmount -v $(pwd)/templates:/app/templates simpleapp:v1.0
 fbf3c35c2f11121ed4a0eedc2f47b42a5ecdc6c6ff4939eb4658ed19999f87d4
 
-$ docker container inspect v1.0-bindmount --format "{{.NetworkSettings.Networks.bridge.IPAddress }}"
+vagrant@standalone:~$ docker container inspect v1.0-bindmount --format "{{.NetworkSettings.Networks.bridge.IPAddress }}"
 172.17.0.6
 
-$ curl http://172.17.0.6:5000
+vagrant@standalone:~$ curl http://172.17.0.6:5000
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,7 +143,7 @@ $ curl http://172.17.0.6:5000
 
 11 - We changed the line containing _"Version"_. and we access again using curl:
 ```
-$ curl http://172.17.0.6:5000
+vagrant@standalone:~$ curl http://172.17.0.6:5000
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +166,7 @@ In this lab we will install and use sshfs volume plugin.
 
 1 -First we install the sshfs plugin.
 ```
-$ docker plugin install vieux/sshfs
+vagrant@standalone:~$ docker plugin install vieux/sshfs
 Plugin "vieux/sshfs" is requesting the following privileges:
 - network: [host]
 - mount: [/var/lib/docker/plugins/]
@@ -184,7 +184,7 @@ Installed plugin vieux/sshfs
 
 2 - Let's take our host IP address and start sshd server (if it is not running yet).
 ```
-$ sudo systemctl status ssh
+vagrant@standalone:~$ sudo systemctl status ssh
 ● ssh.service - OpenBSD Secure Shell server
 Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset:
 enabled)
@@ -202,14 +202,14 @@ __(If it is not started, start ssh service).__
 
 3 - Let 's review installed plugin.
 ```
-$ docker plugin ls
+vagrant@standalone:~$ docker plugin ls
 ID NAME DESCRIPTION ENABLED
 eb37e5a2e676 vieux/sshfs:latest sshFS plugin for Docker true
 ```
 
 As plugins are objects, w ecan inspect installed plugin. We can review important aspects like version, debug mode, or type of mount points that will be managed with this pulgin.
 ```
-$ docker plugin inspect eb37e5a2e676
+vagrant@standalone:~$ docker plugin inspect eb37e5a2e676
 [
   {
   "Config": {
@@ -267,7 +267,7 @@ $ docker plugin inspect eb37e5a2e676
 ```
 4 - We create a new volume named sshvolume (we assumed here a valid SSH username and password). Notice that we used 127.0.0.1 and /tmp directory or filesystem for demo purposes.
 ```
-$ docker volume create -d vieux/sshfs \
+vagrant@standalone:~$ docker volume create -d vieux/sshfs \
 -o sshcmd=ssh_user@127.0.0.1:/tmp \
 -o password=ssh_userpasswd \
 sshvolume
@@ -276,7 +276,7 @@ sshvolume
 5 - Now we can easily run an alpine container mounting sshvolume created.
 
 ```
-$ docker container run --rm -it -v sshvolume:/data alpine sh
+vagrant@standalone:~$ docker container run --rm -it -v sshvolume:/data alpine sh
 / # ls -lart /data
 total 92
 drwx------ 1 root root 17 Nov 9 08:27 systemd-private-809bb564862047608c79c2cc81f67f24-systemd-timesyncd.service-gQ5tZx
@@ -295,7 +295,7 @@ We will now have a quick lab, attaching containers to multiple networks.
 
 1 - We create two different zones, _zone-a_ and _zone-b_.
 ```
-$ docker network create zone-a
+vagrant@standalone:~$ docker network create zone-a
 bb7cb5d22c03bffdd1ef52a7469636fe2e635b031b7528a687a85ff9c7ee4141
 
 $ docker network create zone-b
@@ -304,15 +304,15 @@ $ docker network create zone-b
 
 2 - We start a container named _cont1_ on _zone-a_,
 ```
-$ docker container run -d --name cont1 --network zone-a alpine sleep 3000
+vagrant@standalone:~$ docker container run -d --name cont1 --network zone-a alpine sleep 3000
 ef3dfd6a354b5310a9c97fa9247739ac320da1b4f51f6a2b8da2ca465b12f95e
 ```
 
 3 - Then, we connect cont1 container to _zone-b_ and review its IP addresses.
 ```
-$ docker network connect zone-b cont1
+vagrant@standalone:~$ docker network connect zone-b cont1
 
-$ docker exec cont1 ip add
+vagrant@standalone:~$ docker exec cont1 ip add
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1000
   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
   inet 127.0.0.1/8 scope host lo valid_lft forever preferred_lft forever
@@ -329,18 +329,19 @@ $ docker exec cont1 ip add
 
 4 - Now we can run two containers with just ine interface. One of them will run attached to _zone-a_ while the other one will just have zone-b attached.
 ```
-$ docker container run -d --name cont2 --network zone-b --cap-add NET_ADMIN alpine sleep 3000
+vagrant@standalone:~$ docker container run -d --name cont2 --network zone-b --cap-add NET_ADMIN alpine sleep 3000
 048e362ea27b06f5077306a71cf8adc95ea9844907aec84ec09c0b991d912a33
 
-$ docker container run -d --name cont3 --network zone-a --cap-add NET_ADMIN alpine sleep 3000
+vagrant@standalone:~$ docker container run -d --name cont3 --network zone-a --cap-add NET_ADMIN alpine sleep 3000
 20c7699c54786700c65a0bbe002c750672ffb3986f41d106728b3d598065ecb5
 ```
 
 5 - Let's review the IP addresses and routes on both containers.
 ```
-$ docker exec cont2 ip route default via 172.20.0.1 dev eth0
+vagrant@standalone:~$ docker exec cont2 ip route default via 172.20.0.1 dev eth0
 172.20.0.0/16 dev eth0 scope link src 172.20.0.3
-$ docker exec cont3 ip route default via 172.19.0.1 dev eth0
+
+vagrant@standalone:~$ docker exec cont3 ip route default via 172.19.0.1 dev eth0
 172.19.0.0/16 dev eth0 scope link src 172.19.0.3
 ```
 
@@ -348,9 +349,9 @@ $ docker exec cont3 ip route default via 172.19.0.1 dev eth0
 
 - On cont2 container
 ```
-$ docker exec cont2 route add -net 172.19.0.0 netmask 255.255.255.0 gw 172.20.0.2
+vagrant@standalone:~$ docker exec cont2 route add -net 172.19.0.0 netmask 255.255.255.0 gw 172.20.0.2
 
-$ docker exec cont2 ip route
+vagrant@standalone:~$ docker exec cont2 ip route
 default via 172.20.0.1 dev eth0
 172.19.0.0/24 via 172.20.0.2 dev eth0
 172.20.0.0/16 dev eth0 scope link src 172.20.0.3
@@ -358,7 +359,7 @@ default via 172.20.0.1 dev eth0
 
 - On cont3 container
 ```
-$ docker exec cont3 route add -net 172.20.0.0 netmask 255.255.255.0 gw 172.19.0.2
+vagrant@standalone:~$ docker exec cont3 route add -net 172.20.0.0 netmask 255.255.255.0 gw 172.19.0.2
 
 $ docker exec cont3 ip route
 default via 172.19.0.1 dev eth0
@@ -368,10 +369,10 @@ default via 172.19.0.1 dev eth0
 
 7 - Remember that we don't have resolution between different networks. Therefore, we can not reach _cont2_ by its name.
 ```
-$ docker exec cont3 ping -c 3 cont2
+vagrant@standalone:~$ docker exec cont3 ping -c 3 cont2
 ping: bad address 'cont2'
 
-$ docker exec cont3 ping -c 3 cont1
+vagrant@standalone:~$ docker exec cont3 ping -c 3 cont1
 PING cont1 (172.19.0.2): 56 data bytes
 64 bytes from 172.19.0.2: seq=0 ttl=64 time=0.063 ms
 64 bytes from 172.19.0.2: seq=1 ttl=64 time=0.226 ms
@@ -385,7 +386,7 @@ As we expected, name resolution within _zone-a_ network works fine. Any other co
 
 8 - We should be able to ping from container _cont3_ to _cont2_ IP address.
 ```
-$ docker exec cont3 ping -c 3 172.20.0.3
+vagrant@standalone:~$ docker exec cont3 ping -c 3 172.20.0.3
 PING 172.20.0.3 (172.20.0.3): 56 data bytes
 64 bytes from 172.20.0.3: seq=0 ttl=63 time=0.151 ms
 64 bytes from 172.20.0.3: seq=1 ttl=63 time=0.229 ms
@@ -404,13 +405,13 @@ In this lab we are going to deploy a simple three-layer application. In fact it 
 
 1 - First we create a bridge network named _simplenet_, where we will attach all application components.
 ```
-$ docker network create simplenet
+vagrant@standalone:~$ docker network create simplenet
 b5ff93985be84095e70711dd3c403274c5ab9e8c53994a09e4fa8adda97f37f7
 ```
 
 2 - We will deploy a postgres database with "changeme" as password for root user. We created a simple database named _demo_ with a _demo_ user with "d3m0" password for this lab.
 ```
-$ docker container run -d \
+vagrant@standalone:~$ docker container run -d \
 --name simpledb \
 --network simplenet \
 --env "POSTGRES_PASSWORD=changeme" \
@@ -420,7 +421,7 @@ codegazers/simplestlab:simpledb
 
 3 - Now we launch backend application component, named _simpleapp_. Notice that in this case we used many environment variables to configure the application side. We set the database host, the database name and the required credentials.
 ```
-$ docker container run -d \
+vagrant@standalone:~$ docker container run -d \
 --name simpleapp \
 --network simplenet \
 --env dbhost=simpledb \
@@ -434,7 +435,7 @@ We have not published the application. Therefore, it is only accesible locally.
 
 4 - Let's review application component IP addresses deployed right now. We will inspect containers attached to _simplenet_.
 ```
-$ docker network inspect simplenet --format "{{range .Containers}} {{.IPv4Address }} {{.Name}} {{end}}"
+vagrant@standalone:~$ docker network inspect simplenet --format "{{range .Containers}} {{.IPv4Address }} {{.Name}} {{end}}"
 172.22.0.4/16 simpleapp 172.22.0.3/16 simpledb
 ```
 >NOTE: Your environment may provide a different IP addresses. Use your IPs on next steps.
@@ -443,13 +444,13 @@ $ docker network inspect simplenet --format "{{range .Containers}} {{.IPv4Addres
 5 - If we take a look at exposed (not published) ports on each image definitions we observe:
 - On database component:
 ```
-$ docker inspect codegazers/simplestlab:simpledb --format "{{json .Config.ExposedPorts }}"
+vagrant@standalone:~$ docker inspect codegazers/simplestlab:simpledb --format "{{json .Config.ExposedPorts }}"
 {"5432/tcp":{}}
 ```
 
 - On application backend:
 ```
-$ docker inspect codegazers/simplestlab:simpleapp --format "{{json .Config.ExposedPorts }}"
+vagrant@standalone:~$ docker inspect codegazers/simplestlab:simpleapp --format "{{json .Config.ExposedPorts }}"
 {"3000/tcp":{}}
 ```
 
@@ -457,7 +458,7 @@ $ docker inspect codegazers/simplestlab:simpleapp --format "{{json .Config.Expos
 
 Let's try database, on 172.22.0.3 IP address and 5432 port. We will use _curl -I_ becasue wedon't really care about the response content. We just want to be able to connect to the exposed port.
 ```
-$ curl -I 172.22.0.3:5432
+vagrant@standalone:~$ curl -I 172.22.0.3:5432
 curl: (52) Empty reply from server
 ```
 
@@ -465,7 +466,7 @@ In this case, "Empty reply from server" is an OK. Database is listening on that 
 
 Same will happen on application backend, on 172.22.0.4 IP address and 3000 port.
 ```
-$ curl -I 172.22.0.4:3000
+vagrant@standalone:~$ curl -I 172.22.0.4:3000
 HTTP/1.1 200 OK
 Content-Type: text/html; charset=UTF-8
 Date: Sat, 16 Nov 2019 11:38:22 GMT
@@ -476,7 +477,7 @@ In this situation we will be able to open our browse pointing to http://172.22.0
 
 7 - Let's deploy the load balancer component. This component will publish a port on our host. Notice that we added two environment variables to allow load balancer to connect to backend application (we configure the load balancer on the fly with these variables because this image is modified for this behavior).
 ```
-$ docker container run -d \
+vagrant@standalone:~$ docker container run -d \
 --name simplelb \
 --env APPLICATION_ALIAS=simpleapp \
 --env APPLICATION_PORT=3000 \
@@ -488,7 +489,7 @@ codegazers/simplestlab:simplelb
 
 8 - Let's take a look to our local iptables. Docker daemon has added a NAT rule to guide traffic from port 8080 to port 80 on load balancer component.
 ```
-$ sudo iptables -L DOCKER -t nat --line-numbers --numeric
+vagrant@standalone:~$ sudo iptables -L DOCKER -t nat --line-numbers --numeric
 Chain DOCKER (2 references)
 num target prot opt source destination
 1 RETURN all -- 0.0.0.0/0 0.0.0.0/0
@@ -508,5 +509,3 @@ num target prot opt source destination
 This GUI is in fact the application backend front page. As we mentioned before it is not a
 real 3-layer application. We added a load balancer as frontend just to publish and add some
 rules there.
-
-

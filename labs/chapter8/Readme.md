@@ -8,7 +8,7 @@
 >
 >You can use your own host (laptop or server), we provide you mock environments to avoid any change in your system.
 >
->These labs should be executed on Docker Swarm. We peovide you with a fully functional environment ready to deploy Docker Swarm. This will run 4 virtual nodes on your host. __You will need at least 8GB of RAM and 4 vCPUs__.
+>These labs should be executed on Docker Swarm. We provide you with a fully functional environment ready to deploy Docker Swarm. This will run 4 virtual nodes on your host. __You will need at least 8GB of RAM and 4 vCPUs__.
 >
 >Follow the specific instructions to deploy the [Swarm environment](../../environments/swarm/Readme.md) before starting these labs. 
 >
