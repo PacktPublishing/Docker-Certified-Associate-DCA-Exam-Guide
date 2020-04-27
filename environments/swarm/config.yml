@@ -3,8 +3,8 @@ environment:
   engine_version: "current"
   experimental: true
   
-  base_box: "frjaraur/xenial64"
-  base_box_version: "1.4"
+  base_box: "frjaraur/bionic64"
+  base_box_version: "1.1"
   #proxy: "http://your_proxy_goes_here:with_the_port"
 
 boxes:
