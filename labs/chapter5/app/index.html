@@ -1,0 +1,49 @@
+<html>
+<head>
+    <title>{{COLOR}}</title>
+    <meta charset="utf-8" />
+    <style>
+        body {
+            background-color: {{COLOR}};
+        }
+        .center {
+            padding: 70px 0;
+        }
+        h2 {
+            color: grey;
+            text-align: left;
+            font-family: "Sans-serif", Arial;
+            font-style: oblique;
+            font-size: 14px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-left:auto; 
+            margin-right:auto;
+            background-color: #F0F8FF;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            
+        }
+        tr:hover {background-color: #DCDCDC}
+
+        p.padding {
+            padding-top: 2cm;
+        }
+    </style>
+</head>
+<body>
+<div class="center">
+    <table style="float:center" >
+        <tr><td>Container IP:</td><td>{{CONTAINER_IP}}</td></tr>
+        <tr><td>Client IP:</td><td>{{CLIENT_IP}}</td></tr>
+        <tr><td>Container Name:</td><td>{{CONTAINER_NAME}}</td></tr>
+        <tr><td>Color:</td><td>{{COLOR}}</td></tr>
+        <tr><td>Application Version:</td><td>{{APP_VERSION}}</td></tr>
+    </table>
+</div>
+</body>
+
+</html>
