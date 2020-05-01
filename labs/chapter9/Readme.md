@@ -1,8 +1,33 @@
 # Chapter 9
 
+## Technical requirements
+
+In this chapter we will learn basic Kubernetes orchestrator concepts. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant Kubernetes environment or any already deployed Kubernetes cluster at your own.
+
+You will need at least (all labs were tested on Linux and Windows hosts):
+
+    - Some Linux, MacOS or Windows basic skills to edit files (using Notepad, Vim, Emacs or any other editor).
+    - Git command-line, Vagrant and Virtualbox installed on your PC or laptop.
+    - Already cloned book's repository [https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git](https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git).
+    - Enough hardware resources: 4vCPU, 8GB of RAM and 75 GB of available diskspace on your hard drive for virtual nodes.
+
+Extended instructions can be found on Github book's repository. These labs will use _"environments/kubernetes-environment"_ folder for the creation of the virtual environment and _"labs/chapter9"_ folder.
+
+>NOTE:
+>
+>To clone book' s repository [https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git](https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git), prepare a directory on your laptop or PC and execute ___git clone https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git___. This will dowload all required files on your current folder.
+>
+All labs will start executing ___vagrant up___  using your command-line from the environment directory _"environments/kubernetes-environment"_. This command will start all the required nodes for you. If you are using your own Kubernetes cluster, you can use _"labs/chapter9"_ folder. Ask your Kubernetes administrator for the cluster-required credentials for your environment to execute the provided labs.
+
+Once all environment nodes are up and running, move yourself to "labs/chapter9" folder and follow each lab instructions.
+
+After completed the labs, you can use ___vagrant destroy -f___ from _"environments/kubernetes-environment"_ directory to completely remove all the deployed nodes and free your disk. 
+
+---
+
 ## Previous requirements
 - Working Vagrant and VirtualBox installation.
-- Running "Kubernetes" environemnt.
+- Running "Kubernetes" environment.
 
 >NOTE:
 >
