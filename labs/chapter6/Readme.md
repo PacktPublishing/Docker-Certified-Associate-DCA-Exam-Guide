@@ -57,9 +57,12 @@ To start in your system we will remove previous trust content (create a backup b
 vagrant@standalone:~$ rm -rf ~/.docker/trust/
 ```
 
-2 - Now enable Docker Content Trust
+2.Now, enable Docker Content Trust and create a directory for this lab:
 ```
-vagrant@standalone:~$ export DOCKER_CONTENT_TRUST=1
+[vagrant@standalone ~]$ export DOCKER_CONTENT_TRUST=1
+
+[vagrant@standalone ~]$ cd $HOME
+[vagrant@standalone ~]$ mkdir chapter6
 ```
 
 3 - We have prepared a quite simple Dockerfile executing _ping to 8.8.8.8_ 300 times. This is the [Dockerfile](./Dockerfile) file content:
@@ -71,7 +74,7 @@ CMD ping 8.8.8.8 -c 300
 
 4 - We now build the image. Remember that _Content Trust_ was enabled.
 ```
-vagrant@standalone:~$ docker image build -t frjaraur/pingo:trusted .
+[vagrant@standalone chapter6]$ docker image build -t frjaraur/pingo:trusted .
 Sending build context to Docker daemon 2.048kB
 Step 1/3 : FROM
 alpine@sha256:04696b491e0cc3c58a75bace8941c14c924b9f313b03ce5029ebbc040ed9d
@@ -113,7 +116,7 @@ Tagging alpine@sha256:04696b491e0cc3c58a75bace8941c14c924b9f313b03ce5029ebbc040e
 
 5 - Now we will sign this image using "docker trust sign". This process will ask us to create a root passphrase, a repository passphrase and a user passphrase (this is new in this chapter because we did not use docker trust to sign images before in this chapter). This will create a new _trust_ directory under _.docker_. When image is pushed, you will be asked again about your registry user passphrase. This is not your Docker Hub password, is the passphrase to allow you signing.
 ```
-vagrant@standalone:~$ docker trust sign frjaraur/pingo:trusted
+[vagrant@standalone chapter6]$ docker trust sign frjaraur/pingo:trusted
 You are about to create a new root signing key passphrase. This passphrase will be used to protect the most sensitive key in your signing system.
 Please choose a long, complex passphrase and be careful to keep the password and the key file itself secure and backed up. It is highly recommended that you use a password manager to generate the passphrase and keep it safe. There will be no way to recover this key. You can find the key in your config directory.
 Enter passphrase for new root key with ID 9e788ed:
@@ -137,7 +140,7 @@ Successfully signed docker.io/frjaraur/pingo:trusted
 
 6 - Image was signed and pushed to Docker Hub. We can verify that the image was uploaded using _curl_.
 ```
-vagrant@standalone:~$ curl -s https://hub.docker.com/v2/repositories/frjaraur/pingo/tags|jq
+[vagrant@standalone chapter6]$ curl -s https://hub.docker.com/v2/repositories/frjaraur/pingo/tags|jq
 {
 
   "count": 1,
@@ -175,7 +178,7 @@ vagrant@standalone:~$ curl -s https://hub.docker.com/v2/repositories/frjaraur/pi
 
 7 - Finally we will review the image signatures:
 ```
-vagrant@standalone:~$ docker trust inspect --pretty frjaraur/pingo:trusted
+[vagrant@standalone chapter6]$ docker trust inspect --pretty frjaraur/pingo:trusted
 Signatures for frjaraur/pingo:trusted
 SIGNED TAG DIGEST SIGNERS
 trusted 478cd976c78306bbffd51a4b5055e28873697d01504e70ef85bddd9cc348450b

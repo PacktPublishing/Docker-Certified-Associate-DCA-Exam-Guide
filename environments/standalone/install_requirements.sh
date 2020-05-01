@@ -1,9 +1,14 @@
 #!/bin/bash
 
+echo "vagrant:v4grant"|sudo chpasswd
+
+
 echo "Installing Docker Community Engine using get.docker.com"
 curl -sL https://get.docker.com |sudo sh
 
-echo "execute newgrp to update your groups and be able to execute Docker"
+sudo usermod -aG docker vagrant
+
+sudo systemctl start docker
 
 echo "Installing Docker-Compose from binaries"
 
@@ -11,4 +16,4 @@ sudo  curl -sL "https://github.com/docker/compose/releases/download/1.24.1/docke
 
 sudo chmod +x /usr/local/bin/docker-compose
 
-
+echo "**** Execute 'newgrp docker' to update your groups and be able to execute Docker ****"
