@@ -50,6 +50,7 @@ rh_install_common_software  = <<SCRIPT
   ntpdate \
   ntp \
   python \
+  git \
   && timedatectl set-timezone Europe/Madrid
 SCRIPT
 
