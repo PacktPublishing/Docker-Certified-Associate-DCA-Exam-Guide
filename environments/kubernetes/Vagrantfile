@@ -50,7 +50,7 @@ SCRIPT
 
 puts '--------------------------------------------------------------------------------------------'
 
-puts ' Docker SWARM MODE Vagrant Environment'
+puts ' KUBERNETES Vagrant Environment'
 
 puts ' Engine Version: '+engine_version
 
