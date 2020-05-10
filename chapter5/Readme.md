@@ -2,7 +2,7 @@
 
 ## Technical requirements
 
-In this chapter we will learn Docker Engine concepts. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant standalone environment or any already deployed Docker host at your own.
+In this chapter we will learn Docker multi-containers applications. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant standalone environment or any already deployed Docker host at your own.
 
 You will need at least (all labs were tested on Linux and Windows):
     
@@ -16,12 +16,12 @@ You will need at least (all labs were tested on Linux and Windows):
 
 - Enough hardware resources: 1vCPU, 3GB of RAM and 10 GB of available disk space on your hard drive for virtual nodes.
 
-Extended instructions can be found on Github book's repository. These labs will use "environments/standalone-environment" folder for the creation of the virtual environment and "labs/chapter5" folder.
+Extended instructions can be found on Github book's repository. These labs will use "environments/standalone-environment" folder for the creation of the virtual environment and "chapter5" folder.
 To clone book's repository [https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git](https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git), prepare a directory on your laptop or PC and execute git clone https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git. This will dowload all required files on your current folder.
 
-All labs will start executing vagrant up  using your command-line from the environment directory "environments/standalone-environment". This command will start all the required nodes for you. If you are using your own Docker host, you can move directly to "labs/chapter5" folder.
+All labs will start executing vagrant up  using your command-line from the environment directory "environments/standalone-environment". This command will start all the required nodes for you. If you are using your own Docker host, you can move directly to "chapter5" folder.
 
-Once all environment nodes are up and running, go to "labs/chapter5" folder and follow each lab instructions.
+Once all environment nodes are up and running, go to "chapter5" folder and follow each lab instructions.
 
 This environment will be used for labs from chapter 1 to chapter 6. You can keep it on your host stopped, not cosumming RAM and CPU resources. You can execute vagrant halt to stop running virtual node. This will not remove your environment and you will be able to continue using it on next chapter's labs.
 
@@ -39,13 +39,13 @@ After completed the labs, you can use vagrant destroy -f from "environments/stan
 
 ---
 
-### Following labs can be found under labs/chapter5 directory.
+### Following labs can be found under chapter5 directory.
 
 
 ---
 ## __Lab1__: Colors lab application
 
-We will run a simple application that will show us a different color using variables. We will be able to review container's IP address and hostname. We will use docker-compose hence it must be installed. This is explained in the book. If you are using "Standalone" Environment, you are usin a Linux node for the labs and you can follow these instructions:
+We will run a simple application that will show us a different color using variables. We will be able to review 's IP address and hostname. We will use docker-compose hence it must be installed. This is explained in the book. If you are using "Standalone" Environment, you are usin a Linux node for the labs and you can follow these instructions:
 
 ```
 vagrant@standalone:~$ sudo curl -L --fail https://github.com/docker/compose/releases/download/1.24.1/run.sh -o /usr/local/bin/docker-compose
@@ -69,7 +69,7 @@ networks:
     lab:
 ```
 
-It is very simple. We defined "random" service using the code contained in "app" directory. We will expose container port 3000 to a random host one.
+It is very simple. We defined "random" service using the code contained in "app" directory. We will expose  port 3000 to a random host one.
 
 2 - We will now build images using "lab1" as project name. Notice that we defined "lab" network. Docker daemon will create "lab1_random" image and "lab1_lab" network.
 ```
@@ -92,7 +92,7 @@ npm WARN app@1.0.0 No description
 npm WARN app@1.0.0 No repository field.
 added 3 packages from 1 contributor and audited 3 packages in 1.17s
 found 0 vulnerabilities
-Removing intermediate container 4c11ecc0b606
+Removing intermediate  4c11ecc0b606
 ---> e183421a2f83
 Step 6/9 : COPY app.js app.js
 ...
@@ -101,13 +101,13 @@ Step 6/9 : COPY app.js app.js
 ---> 23942ce67aee
 Step 9/9 : EXPOSE 3000
 ---> Running in 51379c5e7630
-Removing intermediate container 51379c5e7630
+Removing intermediate  51379c5e7630
 ---> c0dce423a972
 Successfully built c0dce423a972
 Successfully tagged lab1_random:latest
 ```
 
-3 - Now we execute our multi-container application (in this case we just have one service definition).
+3 - Now we execute our multi- application (in this case we just have one service definition).
 ```
 vagrant@standalone:~$ docker-compose -p lab1 -f docker-compose.random.yaml up -d
 Creating network "lab1_lab" with the default driver
@@ -124,10 +124,10 @@ lab1_random_1 docker-entrypoint.sh node ... Up 0.0.0.0:32780->3000/tcp
 vagrant@standalone:~$ curl 0.0.0.0:32780/text
 APP_VERSION: 1.0
 COLOR: blue
-CONTAINER_NAME: 17bc24f60799
-CONTAINER_IP: 172.27.0.2
+_NAME: 17bc24f60799
+_IP: 172.27.0.2
 CLIENT_IP: ::ffff:172.27.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 ```
 
 5 - We can use a web browser to access the running application but it is enough using curl because application is prepared to show a text response using "/text" endpoint. A random color will be used. In this case we get a "blue" page. It may vary in your environment because a random color will be choosen if "COLOR" variable is not set.
@@ -207,10 +207,10 @@ lab2_red_1 docker-entrypoint.sh node ... Up 0.0.0.0:32781->3000/tcp
 vagrant@standalone:~$ curl 0.0.0.0:32781/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: fc05e400d02a
-CONTAINER_IP: 172.29.0.2
+_NAME: fc05e400d02a
+_IP: 172.29.0.2
 CLIENT_IP: ::ffff:172.29.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 ```
 
 ## __Lab3__: Scaling RED backends
@@ -229,7 +229,7 @@ Creating lab3_red_4 ... done
 Creating lab3_red_5 ... done
 ```
 
-2 - Notice that in this case we are deploying a staless application, without any persistency. There is something else in this case, we left unset the host linked port. Therefore a random one is always used for each container instance. Let's review new instance number with _docker-compose ps_.
+2 - Notice that in this case we are deploying a staless application, without any persistency. There is something else in this case, we left unset the host linked port. Therefore a random one is always used for each  instance. Let's review new instance number with _docker-compose ps_.
 ```
 vagrant@standalone:~$ docker-compose -p lab3 -f docker-compose.red.yaml ps
 Name Command State Ports
@@ -246,49 +246,49 @@ lab3_red_5 docker-entrypoint.sh node ... Up 0.0.0.0:32782->3000/tcp
 vagrant@standalone:~$ curl 0.0.0.0:32781/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: fc05e400d02a
-CONTAINER_IP: 172.29.0.2
+_NAME: fc05e400d02a
+_IP: 172.29.0.2
 CLIENT_IP: ::ffff:172.29.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 
 vagrant@standalone:~$ curl 0.0.0.0:32782/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: f5de33465357
-CONTAINER_IP: 172.29.0.3
+_NAME: f5de33465357
+_IP: 172.29.0.3
 CLIENT_IP: ::ffff:172.29.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 
 vagrant@standalone:~$ curl 0.0.0.0:32783/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: 5be016aadadb
-CONTAINER_IP: 172.29.0.4
+_NAME: 5be016aadadb
+_IP: 172.29.0.4
 CLIENT_IP: ::ffff:172.29.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 
 vagrant@standalone:~$ curl 0.0.0.0:32784/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: 413c9d605bd5
-CONTAINER_IP: 172.29.0.5
+_NAME: 413c9d605bd5
+_IP: 172.29.0.5
 CLIENT_IP: ::ffff:172.29.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 
 vagrant@standalone:~$ curl 0.0.0.0:32785/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: fe879a59c3aa
-CONTAINER_IP: 172.29.0.6
+_NAME: fe879a59c3aa
+_IP: 172.29.0.6
 CLIENT_IP: ::ffff:172.29.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 ```
 
-All IP addresses are different because we are accessing different containers. But all are "red" as we expected.
+All IP addresses are different because we are accessing different s. But all are "red" as we expected.
 
 4 - Let's remove all application instances.
 ```
@@ -385,26 +385,26 @@ lab4_white_1 docker-entrypoint.sh node ... Up 0.0.0.0:32790->3000/tcp
 vagrant@standalone:~$ curl 0.0.0.0:32789/text
 APP_VERSION: 1.0
 COLOR: green
-CONTAINER_NAME: a25a4cc36232
-CONTAINER_IP: 172.31.0.2
+_NAME: a25a4cc36232
+_IP: 172.31.0.2
 CLIENT_IP: ::ffff:172.31.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl 0.0.0.0:32791/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: 5e12b0de196c
-CONTAINER_IP: 172.31.0.4
+_NAME: 5e12b0de196c
+_IP: 172.31.0.4
 CLIENT_IP: ::ffff:172.31.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl 0.0.0.0:32790/text
 APP_VERSION: 1.0
 COLOR: white
-CONTAINER_NAME: b67b09c8c836
-CONTAINER_IP: 172.31.0.3
+_NAME: b67b09c8c836
+_IP: 172.31.0.3
 CLIENT_IP: ::ffff:172.31.0.1
-CONTAINER_ARCH: linux
+_ARCH: linux
 ```
 
 >NOTE: Ramdom ports may be different on your lab environment.
@@ -513,26 +513,26 @@ proxy_pass http://$host:$port;
 vagrant@standalone:~$ curl -H "Host: white" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: white
-CONTAINER_NAME: 86871cba5a71
-CONTAINER_IP: 192.168.208.5
+_NAME: 86871cba5a71
+_IP: 192.168.208.5
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
-CONTAINER_NAME: f7d90dc89255
-CONTAINER_IP: 192.168.208.2
+_NAME: f7d90dc89255
+_IP: 192.168.208.2
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl -H "Host: red" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: red
-CONTAINER_NAME: 25bb1b66bab8
-CONTAINER_IP: 192.168.208.3
+_NAME: 25bb1b66bab8
+_IP: 192.168.208.3
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 ```
 
 5 - Remember, none of the services is accessible but loadbalancer. Let's review published ports using _docker-compose ps_.
@@ -563,39 +563,39 @@ Creating lab5_green_4 ... done
 vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
-CONTAINER_NAME: ba90c57914f9
-CONTAINER_IP: 192.168.208.7
+_NAME: ba90c57914f9
+_IP: 192.168.208.7
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
-CONTAINER_NAME: c1a9ebcf82ac
-CONTAINER_IP: 192.168.208.6
+_NAME: c1a9ebcf82ac
+_IP: 192.168.208.6
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
-CONTAINER_NAME: d5436822ca8f
-CONTAINER_IP: 192.168.208.8
+_NAME: d5436822ca8f
+_IP: 192.168.208.8
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 
 vagrant@standalone:~$ curl -H "Host: green" 0.0.0.0:8080/text
 APP_VERSION: 1.0
 COLOR: green
-CONTAINER_NAME: f7d90dc89255
-CONTAINER_IP: 192.168.208.2
+_NAME: f7d90dc89255
+_IP: 192.168.208.2
 CLIENT_IP: ::ffff:192.168.208.4
-CONTAINER_ARCH: linux
+_ARCH: linux
 ```
 
 As we expected, we get different backends on each request because DNS gave load balancer a different backend IP address.
 
-8 - To fininsh this lab let's install "bind-tools" on loadbalancer container and query internal DNS using _host_ tool. We will query _red_ and _green_ services. We will use docker-compose exec to install _bin-tools_ package in loadbalancer container. Once package is installed, we will use _docker-compose exec_ again with _host_ command to query DNS.
+8 - To fininsh this lab let's install "bind-tools" on loadbalancer  and query internal DNS using _host_ tool. We will query _red_ and _green_ services. We will use docker-compose exec to install _bin-tools_ package in loadbalancer . Once package is installed, we will use _docker-compose exec_ again with _host_ command to query DNS.
 ```
 vagrant@standalone:~$ docker-compose -p lab5 -f docker-compose.loadbalancer.yaml exec loadbalancer apk add -q --update bind-tools
 
@@ -609,7 +609,7 @@ green has address 192.168.208.7
 green has address 192.168.208.6
 ```
 
-Internal DNS gave us all the IP addresses associated with _green_ and _red_ services. Those are the associated containers IP addresses. Therefor our defined _green_ service is load balanced to all running _green_ backends.
+Internal DNS gave us all the IP addresses associated with _green_ and _red_ services. Those are the associated s IP addresses. Therefor our defined _green_ service is load balanced to all running _green_ backends.
 
 9 - Remove all labs using _docker-compose down_ with the appropiate docker-compose file and project name.
 ```

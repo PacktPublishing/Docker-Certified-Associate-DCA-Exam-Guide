@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simplest Lab - (by frjaraur)</title>
+    <meta charset="utf-8" http-equiv="refresh" content="5">
+    <script src='Chart.js'></script>
+
+    <style>
+
+        h2 {
+            color: grey;
+            text-align: left;
+            font-family: "Sans-serif", Arial;
+            font-style: oblique;
+            font-size: 14px;
+        }
+        li {
+            color: black;
+            text-align: left;
+            font-family: "Sans-serif", Arial;
+            font-style: oblique;
+            font-size: 10px;
+        }
+        a {
+            color: blue;
+        }
+        .button {
+            float: left;
+            background-color: #e7e7e7;
+            border: none;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            /*display: inline-block;*/
+            font-size: 16px;
+        }
+        .tweet {background-color: #008CBA;}
+
+
+    </style>
+</head>
+<body>
+<h2>Auto-Refresh is enabled so a new request will be done every 5 seconds.</h2>
+    <h2>Esto es un test de laboratorio</h2>
+<ul>
+<li>Last Request Server IP: <h2>{{SERVERIP}}</h2></li>
+<li>Last Request Server Name: <h2>{{SERVERNAME}}</h2></li>
+<li>Load Balancer IP: <h2>{{CLIENTIP}}</h2></li>
+<li>Active Applicacion Servers: <h2>{{APPSERVERS}}</h2></li>
+<li>Total Requests: <h2>{{TOTALHITS}}</h2></li>
+<li>Database Server: <h2>{{DBSERVER}}</h2></li>
+</ul>
+
+    <canvas id="appChart" style="display";block;></canvas>
+
+
+    <script>
+        var data = {
+            labels: [{{chartLabels}}],
+            datasets: [
+                {
+                    label: "Requests per Backend Server IP",
+                    fillColor: "rgba(220,220,220,0.2)",
+                    strokeColor: "rgba(220,220,220,1)",
+                    pointRadius: 3,
+                    pointColor: "rgba(220,220,220,1)",
+                    pointStrokeColor: "#fff",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(220,220,220,1)",
+                    data: [{{chartData}}],
+                }
+            ]
+        };
+        var options = {
+            animation: {
+                duration:5000
+            },
+            responsive:false,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Hits'
+                  },
+                  ticks: {
+                      min: 0,
+                  }
+                }]
+            }
+        };
+        var ctx = document.getElementById("appChart").getContext("2d");
+        ctx.canvas.width = 800;
+        ctx.canvas.height = 300;
+        var myNewChart = new Chart(ctx , { type: "line", data: data, options: options,});
+
+
+    </script>
+    <table border=0>
+    <tr>
+    <td><form action='/' method='post' name='request'><td>
+    <button class='button' type='submit' name='action' value='app_reset'>Make Request</button>
+    </form></td>
+    <td><form action='/reset' method='post' name='reset'><td>
+    <button class='button' type='submit' name='action' value='app_reset'>Reset App Data</button>
+    </form></td>
+<!--    <td>
+        <a href="https://twitter.com/intent/tweet?button_hashtag=Dockerbirthday&text=Having%20Fun%20With%20@Docker,%20@Hoplasoftware%20and%20@Microsoft%20Celebrating" class="button tweet" data-related="@HoplaSoftware,user2">Tweet #Dockerbirthday</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+  </td> -->
+    </tr>
+    </table>
+</body>
+</html>
