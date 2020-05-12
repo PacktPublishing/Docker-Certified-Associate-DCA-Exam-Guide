@@ -18,7 +18,7 @@ spec:
     spec:
       nodeName: kubernetes-node2
       containers:
-      - image: codegazers/nginx-lab:1.0
+      - image: codegazers/nginx-lab:1.1
         env:
         - name: HTMLDIR
           value: /wwwroot
