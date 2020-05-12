@@ -21,17 +21,17 @@ spec:
       - image: codegazers/nginx-lab:1.0
         env:
         - name: HTMLDIR
-          value: /mnt
+          value: /wwwroot
         - name: PAGETITLE
           valueFrom:
             secretKeyRef:
               name: webserver-secret
-              key: TITLE
+              key: PAGETITLE
         - name: PAGEBODY
           valueFrom:
             secretKeyRef:
               name: webserver-secret
-              key: BODY
+              key: PAGEBODY
         name: nginx
         resources: {}
         volumeMounts:
