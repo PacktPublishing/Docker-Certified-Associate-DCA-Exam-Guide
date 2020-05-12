@@ -6,7 +6,7 @@ data:
             server_name  test;
 
             location / {
-                root   __WWWROOT__;
+                root   /wwwroot;
                 index  index.html index.htm;
             }
 

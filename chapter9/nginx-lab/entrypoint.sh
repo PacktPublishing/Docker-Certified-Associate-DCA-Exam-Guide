@@ -6,10 +6,7 @@ HTMLDIR=${HTMLDIR}
 #/etc/nginx/nginx.conf
 #/etc/nginx/conf.d
 
-if [ -d ${HTMLDIR} ]
-then
-
-[ ! -f ${HTMLDIR}/index.html ] && cat <<-EOF |sudo tee ${HTMLDIR}/index.html
+if [ ! -f ${HTMLDIR}/index.html ] && cat <<-EOF | tee ${HTMLDIR}/index.html
 <!DOCTYPE html>
 <html>
 <head>
@@ -28,12 +25,13 @@ then
 </html>
 EOF
 
+else
+
+    [ -n "${PAGEBODY}" ] && sed -i "s|DEFAULT_BODY|${PAGEBODY}|g" ${HTMLDIR}/index.html
+    [ -n "${PAGETITLE}" ] && sed -i "s|DEFAULT_TITLE|${PAGETITLE}|g" ${HTMLDIR}/index.html
+
 fi
 
 
-[ -n "${PAGEBODY}" ] && sed -i "s|DEFAULT_BODY|${PAGEBODY}|g" ${HTMLDIR}/index.html
-[ -n "${PAGETITLE}" ] && sed -i "s|DEFAULT_TITLE|${PAGETITLE}|g" ${HTMLDIR}/index.html
-
-sed -i "s/__WWWROOT__/${HTMLDIR}/g" /etc/nginx/conf.d/default.conf
 
 exec /usr/sbin/nginx -g 'daemon off;'
