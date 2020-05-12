@@ -6,11 +6,13 @@ HTMLDIR=${HTMLDIR}
 #/etc/nginx/nginx.conf
 #/etc/nginx/conf.d
 
-if [ ! -f ${HTMLDIR}/index.html ] && cat <<-EOF | tee ${HTMLDIR}/index.html
+if [ ! -f ${HTMLDIR}/index.html ] 
+then
+cat <<-EOF | tee ${HTMLDIR}/index.html
 <!DOCTYPE html>
 <html>
 <head>
-<title>EMPTY</title>
+<title>DEFAULT_TITLE</title>
 <style>
     body {
         width: 35em;
@@ -20,7 +22,7 @@ if [ ! -f ${HTMLDIR}/index.html ] && cat <<-EOF | tee ${HTMLDIR}/index.html
 </style>
 </head>
 <body>
-<h1>EMPTY</h1>
+<h1>DEFAULT_BODY</h1>
 </body>
 </html>
 EOF

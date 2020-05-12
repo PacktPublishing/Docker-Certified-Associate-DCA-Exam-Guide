@@ -36,7 +36,7 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /etc/nginx/conf.d/
-        - mountPath: /empty
+        - mountPath: /var/log/nginx
           name: empty-volume
         - name: secret-volume
           mountPath: "/secrets"
