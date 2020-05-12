@@ -34,4 +34,6 @@ fi
 [ -n "${PAGEBODY}" ] && sed -i "s|DEFAULT_BODY|${PAGEBODY}|g" ${HTMLDIR}/index.html
 [ -n "${PAGETITLE}" ] && sed -i "s|DEFAULT_TITLE|${PAGETITLE}|g" ${HTMLDIR}/index.html
 
+sed -i "s/__WWWROOT__/${HTMLDIR}/g" /etc/nginx/conf.d/default.conf
+
 exec /usr/sbin/nginx -g 'daemon off;'

@@ -1,12 +1,12 @@
 apiVersion: v1
 data:
-  test.conf: |+
+  default.conf: |+
         server {
             listen       80;
             server_name  test;
 
             location / {
-                root   /wwwroot;
+                root   __WWWROOT__;
                 index  index.html index.htm;
             }
 
