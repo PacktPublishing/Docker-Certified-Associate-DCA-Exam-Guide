@@ -50,8 +50,7 @@ After completed the labs, you can use ___vagrant destroy -f___ from _"environmen
 ---
 ## __Lab1__: Kubernetes Application Deployment
 
-In this lab we will create a Docker Swarm cluster from the very begining.
-
+In this lab we will deploy an application on Kubernetes. Ensure you followed the required steps to execute your Kubernetes cluster using Vagrant.
 Once Vagrant (or your own environment) is deployed, we will have 3 nodes (named kuberentes-node<index> from 1 to 3) with Ubuntu Xenial and Docker Engine installed. Kubernetes will also be up and running for you, with 1 master node and 2 workers.
 First review your node IP addresses (10.10.10.11 to 10.10.10.13 if you used Vagrant, because first interface will be Vagrant internal).
 
@@ -314,16 +313,33 @@ All labs can be easily removed destroying all vagrant nodes using vagrant destro
 $ vagrant destroy -f
 ```
 
+----
 
 
 
+cxxc
+xcvx
+xc
+xc
+vx
+cx
+vx
+sd
+fsd
+fsdf
+sdf
+sdf
+sdf
+sd
+sdf
+sdf
 ------------
 
 Chapter labs
 
 We will now work through a long lab that will help us to review the concepts we've learned about.
 
-Deploy "environments/kubernetes" from book's github repository (https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git) if you have not done yet. You can use your own Linux server. Use vagrant up from "environments/kubernetes" folder to start your virtual environment. All files used during these labs can be found inside "labs/chapter9" folder.
+Deploy "environments/kubernetes" from book's github repository (https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git) if you have not done yet. You can use your own Linux server. Use vagrant up from "environments/kubernetes" folder to start your virtual environment. All files used during these labs can be found inside "chapter9" folder.
 
 Wait until all nodes are running. We can check nodes status using vagrant status. Connect to your lab node using vagrant ssh swarm-node1. Vagrant deployed 3 nodes for you and you will be using vagrant user with root privileges using sudo. You should have following output:
 
@@ -593,6 +609,244 @@ replicaset.apps/blue-app-787648f786 0 0 0 7m46s blue codegazers/colors:1.15 app=
 
 Going back to the previous state was very easy.
 We can set comments for each change using the --record option on update commands.
+
+## Lab2 - Using Volumes
+
+In this lab we will deploy a simple webserver using different volumes. We will use webserver.deployment.yaml.
+
+We have prepared following volumes:
+
+congigMap - config-volume (with "/etc/nginx/conf.d/default.conf" configuration file)
+emptyDir - empty-volume for Nginx logs "/var/log/nginx".
+secret - secret-volume to specify some variables to compose index.html page.
+persistentVolumeClaim - data-volume binded to hostPath's persistentVolume using host's "/mnt".
+NOTE: We have declared one specific node for our webserver to ensure index.html file location under "/mnt" directory. We have used nodeName: kubernetes-node2 in our Deployment file webserver.deployment.yaml.
+
+1 - First we verify that there is not any file under /mnt directory in kubernetes-node2 node. We connect to kubernetes-node2 and then we will review /mnt content.
+
+$ vagrant ssh kubernetes-node2
+
+vagrant@kubernetes-node2:~$ ls  /mnt/
+2 - Then we change to kubernetes-node1 to clone our repository and launch webserver deployment.
+
+$ vagrant ssh kubernetes-node1
+
+vagrant@kubernetes-node1:~$ git clone https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git
+We move to "chapter9/nginx-lab/yaml".
+
+vagrant@kubernetes-node1:~$ cd Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml/
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$
+3 - We will use a ConfigMap, a Secret, a Service, a PersistentVolume and a PersistentVolumeClaim resources in this lab using YAMLs files. We will deploy all the resource files in th directory "yaml".
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl create -f .
+configmap/webserver-test-config created
+deployment.apps/webserver created
+persistentvolume/webserver-pv created
+persistentvolumeclaim/werbserver-pvc created
+secret/webserver-secret created
+service/webserver-svc created
+4 - Now we will review all the resources created. We have not defined any Namespace, hence default namespace will be used (we omitted it in our commands because it is our default namespace). We will use kubectl get all to list all the resources available in default namespace:
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl get all
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/webserver-d7fbbf4b7-rhvvn   1/1     Running   0          31s
+
+NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service/kubernetes      ClusterIP   10.96.0.1       <none>        443/TCP        107m
+service/webserver-svc   NodePort    10.97.146.192   <none>        80:30080/TCP   31s
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webserver   1/1     1            1           31s
+
+NAME                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/webserver-d7fbbf4b7   1         1         1       31s
+
+But not all resources are listed. PersistentVolume and PersistentVolumeClaim resources are not show. Therefor we will ask Kubernetes API about these resources using kubectl get pv (PersisteVolumes) and kubectl get pvs (PersistenVolumeClaims):
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl get pv
+NAME           CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS   REASON   AGE
+webserver-pv   500Mi      RWO            Retain           Bound    default/werbserver-pvc   manual                  6m13s
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl get pvc
+NAME             STATUS   VOLUME         CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+werbserver-pvc   Bound    webserver-pv   500Mi      RWO            manual         6m15s
+5 - Let's send some requests to our webserver. You can notice in the previous list that "webserver-svc" is published using as NodePort in port 30080, associating hosts' port 30080 with service's port 80. As mentioned, all hosts will publish port 30080, hence we can use curl on current host (kubernetes-node1) and port 30080 and try to reach our webserver's Pods.
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ curl 0.0.0.0:30080
+<!DOCTYPE html>
+<html>
+<head>
+<title>DEFAULT_TITLE</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>DEFAULT_BODY</h1>
+</body>
+</html>
+6 - We have used a ConfigMap resource to specify an Nginx configuration file webserver.configmap.yaml:
+
+apiVersion: v1
+data:
+  default.conf: |+
+        server {
+            listen       80;
+            server_name  test;
+
+            location / {
+                root   /wwwroot;
+                index  index.html index.htm;
+            }
+
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html {
+                root   /usr/share/nginx/html;
+            }
+
+        }
+
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: webserver-test-config
+This configuration is included in our Deloymentwebserver.deployment.yaml. Here is the piece of code where it is defined:
+
+ ...
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d/
+...
+      volumes:
+      - name: config-volume
+        configMap:
+          name: webserver-test-config
+...
+First piece declares where this configuration file will be mounted while second part links the defined resource webserver-test-config. Therefore the data defined inside ConfigMap resource will be integrated inside webserver's Pod as /etc/nginx/conf.d/default.conf (take a look at the data block).
+
+7 - As mentioned before, we also have a Secret resource (webserver.secret.yaml):
+
+apiVersion: v1
+data:
+  PAGEBODY: SGVsbG9fV29ybGRfZnJvbV9TZWNyZXQ=
+  PAGETITLE: RG9ja2VyX0NlcnRpZmllZF9EQ0FfRXhhbV9HdWlkZQ==
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: webserver-secret
+We can verify here that keys are visible while values are not (base64 coded).
+
+NOTE: We can create this Secret also using imperative format with kubectl command-line:
+
+kubectl create secret generic webserver-secret \
+--from-literal=PAGETITLE="Docker_Certified_DCA_Exam_Guide" \
+--from-literal=PAGEBODY="Hello_World_from_Secret"
+We also used this Secret resource in our deployment:
+
+...
+        env:
+...
+        - name: PAGETITLE
+          valueFrom:
+            secretKeyRef:
+              name: webserver-secret
+              key: PAGETITLE
+        - name: PAGEBODY
+          valueFrom:
+            secretKeyRef:
+              name: webserver-secret
+              key: PAGEBODY
+...
+In this case PAGETITLE and PAGEBODY keys will be integrated as environment variables inside webserver's Pod. This values will be used in our lab as values for the index.html page. DEFAULT_BODY and DEFAULT_TITLE will be changed from the Pods's container's process.
+
+8 - This lab has another volume definition. In fact we have a PersistenctVolumeclaim included as a volume in our Deployment's definition:
+
+...
+        volumeMounts:
+...
+        - mountPath: /wwwroot
+          name: data-volume 
+...
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: werbserver-pvc
+...
+This volume claim is used here and mounted in "/wwwroot" inside webserver's Pod. PersistentVolume and PersistentVolumeClaim are defined in webserver.persistevolume.yaml and webserver.persistevolumeclaim.yaml, respectively.
+
+9 - Finally, we have an emptyDir volume definition. This will be used to bypass container's filesystem and save Nginx logs.
+
+...
+        volumeMounts:
+...
+        - mountPath: /var/log/nginx
+          name: empty-volume
+          readOnly: false
+...
+      volumes:
+...
+      - name: empty-volume
+        emptyDir: {}
+...
+10 - First Pod execution will create default "/wwwroot/index.html" inside it. This is mounted inside "kubernetes-node2" node's filesystem inside "/mount" directory. Therefore after this first execution, we can find that "/mnt/index.html" was created (you can verify following step 1 again). This file was published and we get it when we executed curl 0.0.0.0:30080 in step 5.
+
+11 - Our application is quite simple but it is prepared to modify the content of the "index.html" file. As mentioned before, default title and body will be changed with the values defined in the Secret resource. This will happen on container creation if "index.html" file already exist. Now that it is created as we verified in step 10, we can delete webserver's Pod. Kubernetes will create a new one and therefore application will change its content. We use kubectl delete pod.
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl delete pod/webserver-d7fbbf4b7-rhvvn
+pod "webserver-d7fbbf4b7-rhvvn" deleted
+After few seconds, a new pod is created.
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+webserver-d7fbbf4b7-sz6dx   1/1     Running   0          17s
+12 - Let's verify again the content of our webserver using curl.
+
+vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ curl 0.0.0.0:30080
+<!DOCTYPE html>
+<html>
+<head>
+<title>Docker_Certified_DCA_Exam_Guide</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Hello_World_from_Secret</h1>
+</body>
+</html>
+Now content has changed inside the defined PersistentVolume.
+
+We can also verify "/mnt/index.html" content in "kubernetes-node2".
+
+$ vagrant ssh kubernetes-node2
+
+vagrant@kubernetes-node2:~$ ls  /mnt/
+vagrant@kubernetes-node2:~$ cat /mnt/index.html 
+<!DOCTYPE html>
+<html>
+<head>
+<title>Docker_Certified_DCA_Exam_Guide</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Hello_World_from_Secret</h1>
+</body>
+</html>
+In this lab we have used 4 different Volume resources, with different definitions and features.
 
 These labs were very simple, just to show you how to deploy a small application on Kubernetes.
 

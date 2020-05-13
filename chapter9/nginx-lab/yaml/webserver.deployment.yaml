@@ -38,9 +38,7 @@ spec:
           mountPath: /etc/nginx/conf.d/
         - mountPath: /var/log/nginx
           name: empty-volume
-        - name: secret-volume
-          mountPath: "/secrets"
-          readOnly: true
+          readOnly: false
         - mountPath: /wwwroot
           name: data-volume          
       volumes:
@@ -52,13 +50,5 @@ spec:
       - name: data-volume
         persistentVolumeClaim:
           claimName: werbserver-pvc
-      - name: secret-volume
-        secret:
-          secretName: webserver-secret
-          items:
-          - key: PAGETITLE
-            path: webserver/title
-          - key: PAGEBODY
-            path: mysecret/body
 
 status: {}
