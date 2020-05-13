@@ -3,33 +3,19 @@
 In this lab we will deploy a simple webserver using different volumes. We will use [webserver.deployment.yaml](./nginx-lab/yaml/webserver.deployment.yaml).
 
 We have prepared following volumes:
-- congigMap - config-volume (with /etc/nginx/conf.d/default.conf)
-- emptyDir - empty-volume for Nginx logs /var/log/nginx.
-- secret - secret-volume
-- persistentVolumeClaim - data-volume binded to hostPath "/mnt".
+- __congigMap__ - config-volume (with "/etc/nginx/conf.d/default.conf" configuration file)
+- __emptyDir__ - empty-volume for Nginx logs "/var/log/nginx".
+- __secret__ - secret-volume to specify some variables to compose _index.html_ page.
+- __persistentVolumeClaim__ - data-volume binded to hostPath's persistentVolume using host's  "/mnt".
+
+>NOTE: We have declared one specific node for our webserver to ensure _index.html_ file location under "/mnt" directory. We have used __nodeName: kubernetes-node2__
 
 
+1 - First we verify that there is not any file under /mnt directory in _kubernetes-node2_ node.
 ```
 $ vagrant ssh kubernetes-node2
 
-vagrant@kubernetes-node2:~$ cat <<-EOF |sudo tee /mnt/index.html
-<!DOCTYPE html>
-<html>
-<head>
-<title>DEFAULT_TITLE</title>
-<style>
-    body {
-        width: 35em;
-        margin: 0 auto;
-        font-family: Tahoma, Verdana, Arial, sans-serif;
-    }
-</style>
-</head>
-<body>
-<h1>DEFAULT_BODY</h1>
-</body>
-</html>
-EOF
+vagrant@kubernetes-node2:~$ ls  /mnt/
 ```
 
 ```
