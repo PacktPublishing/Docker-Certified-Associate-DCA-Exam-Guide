@@ -51,7 +51,7 @@ After completed the labs, you can use ___vagrant destroy -f___ from _"environmen
 ## __Lab1__: Kubernetes Application Deployment
 
 Wait until all nodes are running. We can check nodes status using vagrant status. Connect to your lab node using vagrant ssh swarm-node1. Vagrant deployed 3 nodes for you and you will be using vagrant user with root privileges using sudo. You should have following output:
-
+```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/kubernetes$ vagrant up
 --------------------------------------------------------------------------------------------
  KUBERNETES Vagrant Environment
@@ -65,7 +65,7 @@ Bringing machine 'kubernetes-node3' up with 'virtualbox' provider...
 
 ...
 Docker-Certified-Associate-DCA-Exam-Guide/environments/kubernetes$
-
+```
 Nodes will have 3 interfaces (IP addresses and virtual hardware resources can be modified changing config.yml file):
 
   - eth0 [10.0.2.15] - Internal, required for Vagrant.
@@ -75,12 +75,13 @@ Nodes will have 3 interfaces (IP addresses and virtual hardware resources can be
 We will use eth1 interface for Kubernetes and we will be able to connect to published applications using 192.168.56.X/24 IP addresses range. All nodes have Docker Engine Community Edition installed and vagrant user is allowed to execute docker. A small Kubernetes cluster with 1 master (kubernetes-node1) and 2 worker nodes (kubernetes-node2 and kubernetes-node3) will be deployed for you.
 
 We can now connect to the first deployed virtual node using vagrant ssh kubernetes-node1. Process may vary if you already deployed Kuberenetes virtual environment before and you just started it using vagrant up.
-
+```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/kubernetes$ vagrant ssh kubernetes-node1
 vagrant@kubernetes-node1:~$
-
+```
 Now you are ready to start the labs. We will start these labs by deploying a simple application.
-Kubernetes application deployment
+
+## Lab1 - Kubernetes application deployment
 
 Once Vagrant (or your own environment) is deployed, we will have three nodes (named kubernetes-node<index> from 1 to 3) with Ubuntu Xenial and Docker Engine installed. Kubernetes will also be up and running for you, with one master node and two workers. Calico CNI will also be deployed for you automatically.
 
@@ -336,6 +337,7 @@ replicaset.apps/blue-app-787648f786 0 0 0 7m46s blue codegazers/colors:1.15 app=
 ```
 
 Going back to the previous state was very easy.
+
 >NOTE: We can set comments for each change using the __--record__ option on update commands.
 
 ## Lab2 - Using Volumes
@@ -556,7 +558,8 @@ vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/ng
 pod "webserver-d7fbbf4b7-rhvvn" deleted
 ```
 
-After few seconds, a new pod is created.
+After few seconds, a new pod is created (we are using a Deployment and Kubernetes takes care of application's components resilience).
+
 ```
 vagrant@kubernetes-node1:~/Docker-Certified-Associate-DCA-Exam-Guide/chapter9/nginx-lab/yaml$ kubectl get pods
 NAME                        READY   STATUS    RESTARTS   AGE

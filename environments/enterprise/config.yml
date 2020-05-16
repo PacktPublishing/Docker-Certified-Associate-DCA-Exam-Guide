@@ -34,4 +34,4 @@ boxes:
   mgmt_ip: "10.10.10.14"
   hostonly_ip: "192.168.56.14"
   mem: "4096"
-  cpu: "1"
+  cpu: "2"
