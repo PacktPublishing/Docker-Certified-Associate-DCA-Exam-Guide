@@ -50,7 +50,7 @@ After completed the labs, you can use ___vagrant destroy -f___ from _"environmen
 ---
 ## __Lab1__: Kubernetes Application Deployment
 
-Wait until all nodes are running. We can check nodes status using vagrant status. Connect to your lab node using vagrant ssh swarm-node1. Vagrant deployed 3 nodes for you and you will be using vagrant user with root privileges using sudo. You should have following output:
+Wait until all nodes are running. We can check nodes status using vagrant status. Connect to your lab node using vagrant ssh kubernetes-node1. Vagrant deployed 3 nodes for you and you will be using vagrant user with root privileges using sudo. You should have following output:
 ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/kubernetes$ vagrant up
 --------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ Docker-Certified-Associate-DCA-Exam-Guide/environments/kubernetes$
 Nodes will have 3 interfaces (IP addresses and virtual hardware resources can be modified changing config.yml file):
 
   - eth0 [10.0.2.15] - Internal, required for Vagrant.
-  - eth1 [10.10.10.X/24] - Prepared for Docker Swarm internal communication. First node will get 10.10.10.11 IP address and so on.
+  - eth1 [10.10.10.X/24] - Prepared for Docker Kubernetes internal communication. First node will get 10.10.10.11 IP address and so on.
   - eth2 [192.168.56.X/24] - Host-only interface for communication between your host and the virtual nodes. First node will get 192.168.56.11 IP address and so on.
 
 We will use eth1 interface for Kubernetes and we will be able to connect to published applications using 192.168.56.X/24 IP addresses range. All nodes have Docker Engine Community Edition installed and vagrant user is allowed to execute docker. A small Kubernetes cluster with 1 master (kubernetes-node1) and 2 worker nodes (kubernetes-node2 and kubernetes-node3) will be deployed for you.
