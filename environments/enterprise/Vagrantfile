@@ -38,7 +38,7 @@ experimental=config['environment']['experimental']
 
 
 boxes.each do |box|
-  boxes_hostsfile_entries=boxes_hostsfile_entries+box['mgmt_ip'] + ' ' +  box['name']  + ' ' +  box['name']+config['environment']['domain']  + '\n'
+  boxes_hostsfile_entries=boxes_hostsfile_entries+box['mgmt_ip'] + ' ' +  box['name']  + ' ' +  box['name']  + '.' +  config['environment']['domain']  + '\n'
 end
 
 #puts boxes_hostsfile_entries
