@@ -22,10 +22,12 @@ base_box_version=config['environment']['base_box_version']
 
 engine_version=config['environment']['engine_version']
 
+ucp_fqdn=config['environment']['ucp_fqdn']
+ucp_ip=config['environment']['ucp_ip']
 
 boxes = config['boxes']
 
-boxes_hostsfile_entries=""
+boxes_hostsfile_entries=ucp_ip+' '+ucp_fqdn + '\n'
 
 
 ## EXPERIMENTAL FEATURES
@@ -119,9 +121,11 @@ Vagrant.configure(2) do |config|
       config.vm.network "private_network",
         ip: node['hostonly_ip']
 
-      # config.vm.network "public_network",
-      # bridge: ["enp4s0","wlp3s0","enp3s0f1","wlp2s0"],
-      # auto_config: true
+      if node['bridge_interface']
+        config.vm.network "public_network",
+        bridge: node['bridge_interface'],
+        auto_config: true
+      end
 
 
       config.vm.provision "shell", inline: <<-SHELL
