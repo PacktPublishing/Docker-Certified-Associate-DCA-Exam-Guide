@@ -8,6 +8,7 @@ environment:
   #proxy: "http://your_proxy_goes_here:with_the_port"
   ucp_fqdn: "ucp.vagrant.labs"
   ucp_ip: "10.10.10.11"
+  domain: "vagrant.labs"
   
 
 boxes:
