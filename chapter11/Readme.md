@@ -1,6 +1,32 @@
 # Chapter 11
 
-## Lab1 - Install UCP cluster
+## Previous requirements
+In this chapter we will learn Docker Swarm orchestrator features. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant Docker Swarm environment or any already deployed Docker Swarm cluster at your own. Check additional information in this book's github code repository available in this link https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git.
+
+You will need at least (all labs were tested on Linux and Windows):
+
+    - Interne connection.
+    - Some Linux, MacOS or Windows basic skills to edit files (using Notepad, Vim, Emacs or any other editor).
+    - Git command-line, Vagrant and Virtualbox installed on your PC or laptop.
+    - Already cloned book' s repository https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git.
+    - Enough hardware resources: 2vCPU, 6GB of RAM per node (4 nodes) and 120 GB of available disk space on your hard drive for all nodes.
+
+Extended instructions can be found on Github book's repository. These labs will use "environments/enterprise" folder for the creation of the virtual environment and "chapter8" folder.
+>NOTE: To clone book' s repository https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git, prepare a directory on your laptop or PC and execute git clone https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git. This will download all required files on your current folder.
+
+All labs will start executing vagrant up  using your command-line from the environment directory "environments/swarm". This command will start all the required nodes for you. If you are using your own Docker Enterprise cluster, you can use "chapter11" folder. Ask your Docker administrator for the cluster-required credentials for your environment to execute the provided labs.
+
+Once all environment nodes are up and running, go to "chapter11" folder and follow each lab instructions.
+
+After completed the labs (__chapters 12 and 13 labs require a running UCP environment__), you can use vagrant destroy -f from "environments/enterprise" directory to completely remove all the lab-deployed nodes and free your disk.
+
+### Following labs can be found under chapter11 directory.
+
+
+---
+
+Before starting these labs, ensure all your nodes are up and running using _vagrant status_.
+
 ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant status
 --------------------------------------------------------------------------------------------
@@ -19,6 +45,11 @@ above with their current state. For more information about a specific
 VM, run `vagrant status NAME`.
  ```
 
+## __Lab1__: Install UCP cluster
+
+In this lab we will create a Docker Enterprise cluster from the very begining.
+
+1 - Connect to enterprise-node1 and instal Docker Enterprise Engine:
 
  ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
@@ -50,11 +81,13 @@ root@enterprise-node1:~# apt-get update -qq
 root@enterprise-node1:~# apt-get install -qq docker-ee docker-ee-cli containerd.io
  ```
 
-Repeat above steps in enterprise-node2, enterprise-node3 and enterprise-node4.
-
-Once Docker Enterprise Engine is installed on all cluster nodes, we can proced to deoly UCP on first manager node. In this case we will start this lab cluster from enterprise-node1.
+2 - Repeat above steps in enterprise-node2, enterprise-node3 and enterprise-node4.
 
 
+
+3 - Once Docker Enterprise Engine is installed on all cluster nodes, we can proced to deploy UCP on first manager node. In this case we will start this lab cluster from enterprise-node1.
+
+```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 
 vagrant@enterprise-node1:~$ sudo -s
@@ -154,18 +187,18 @@ INFO[0091] All Installation Steps Completed
 root@enterprise-node1:~#
 ```
 
-We can now use our browser with _192.168.56.11_, which is the host-to-vm IP address. We will browse to _https://192.168.56.11_ (port 443 is used by default).
+4 - We can now use our browser with _192.168.56.11_, which is the host-to-vm IP address. We will browse to _https://192.168.56.11_ (port 443 is used by default).
 
-![UCP Login](../images/chapter3.png)
+![UCP Login](../images/UCP_Login.png)
 
 >NOTE: We used an auto-signed certificate, created with an internal CA, hence we will receive a security warning because our system will not trust this certificate. We will trust this certificate or simple follow your browser instructions to accept the risk and continue to our UCP's URL.
 
 >NOTE: We will be asked to upload our license. You signed on Docker Hub and you asked for a Trial. We will use this trial license for these labs.
 
+![UCP Login License](../images/UCP_Login_License.png)
 
 
-
-To join the rest of nodes we will just use learned _docker swarm join_ command. UCP is a Docker Swarm cluster, although Kubernetes is also included. All Docker Swarm commands can be used here.
+5 - To join the rest of nodes we will just use learned _docker swarm join_ command. UCP is a Docker Swarm cluster, although Kubernetes is also included. All Docker Swarm commands can be used here.
 We will first get manager's join-token on enterprise-node1.
 
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
@@ -194,7 +227,7 @@ vagrant@enterprise-node3:~$ exit
 ```
 
 
-
+6 - Now we will joing enterprise-node4 as worker. We will ask Docker Swarm for the worker's token.
 ```
 zero@antares:~/Labs/Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 
@@ -213,7 +246,7 @@ This node joined a swarm as a worker.
 vagrant@enterprise-node4:~$
 ```
 
-Now we get back again to any of the manager nodes to review the cluster status.
+7 - Now we get back again to any of the manager nodes to review the cluster status.
 ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 
@@ -234,12 +267,15 @@ User's UCP bundle can be downloaded either using command-line requests to UCP's 
 
 ### Download admin's UCP bundle using command-line.
 
-This method requires _jq_ and _unzip_ on your system. We will use enterprise-node3 as client node to connect to the cluster. First step will install _jq_ adn _unzip_ from Ubuntu repositories and the we will use curl to get admin's token and use it to generate a bundle package for us.
+1 - This method requires _jq_ and _unzip_ on your system. We will use enterprise-node3 as client node to connect to the cluster. First step will install _jq_ adn _unzip_ from Ubuntu repositories and the we will use curl to get admin's token and use it to generate a bundle package for us.
 ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node3
 
 vagrant@enterprise-node3:~$ sudo apt-get install jq unzip -qq
+```
 
+2 - Now we can request authorization token for our user and then we will use it as header to obtain out client bundle.
+```
 vagrant@enterprise-node3:~$ AUTHTOKEN=$(curl -sk -d '{"username":"admin","password":"changeme"}' https://ucp.vagrant.labs/auth/login | jq -r .auth_token);echo ${AUTHTOKEN}
 0ca68d03-2f9d-4173-9861-0f9caa301276
 
@@ -249,7 +285,7 @@ vagrant@enterprise-node3:~$ ls
 ucp-bundle-admin.zip
 ```
 
-We will create __"admin-bundle"__ directory and we will move __"ucp-bundle-admin.zip"__ there to uncompress it.
+3 - We will create __"admin-bundle"__ directory and we will move __"ucp-bundle-admin.zip"__ there to uncompress it.
 ```
 vagrant@enterprise-node3:~$ mkdir admin-bundle
 
@@ -279,20 +315,34 @@ Archive:  ucp-bundle-admin.zip
 ### Download admin's UCP bundle using your browser.
 In this case, __"ucp-bundle-admin.zip"__ will be downloaded to your client host. It will work because _ucp.vagrant.labs" and 192.168.56.11 IP address are both included as aliases inside UCP's certificate.
 
-Navigate on the right-side panel to __"admin" > "My Profile"__. Then your first option will be __Client Bundles__.
+1 - Navigate on the right-side panel to __"admin" > "My Profile"__. Then your first option will be __Client Bundles__.
 
 Click on __"New Client Bundle"__ and choose __"Generate Client Bundle"__. This will download your admin's UCP client bundle in the location defined in your broser.
 
+![UCP Client Bundle](../images/UCP_Client_Bundle.png)
+
 Locate your __"ucp-bundle-admin.zip"__ file and then you can follow the same steps described in __"Download admin's UCP bundle using command-line"__.
+
+
 
 >NOTE: Client bundle will work for Linux, Windows and MacOSX docker clients. Obtaining this zip file may vary on different systems but you should get the same results.
 
 __"ucp-bundle-admin.zip"__ package contains client certificates required to connect to out cluster. This will allow us to connect to either Docker Swarm or Kubernetes environments.
 
 There are environment files to load variables in our session to help us include all the values required.
-Let's connect our enterprise-node3 Docker client. We will load the environment file using source because we are using Linux.
+
+
+## Lab3 - Using admin's UCP bundle.
+
+In this lab we will learn how to use our client bundle to connect to the cluster.
+
+We will use enterprise-node3 node as client therefore we have used "Download admin's UCP bundle using command-line" procedure.
+
+1 - Let's connect our enterprise-node3 Docker client. We will load the environment file using _source_ built-in command because we are using Linux.
 
 >NOTE: If you are following this lab form your laptop or any other Microsoft Windows-based environemnt you should previously install docker a client (can be downloaded from UCP's Web UI in this link https://192.168.56.11/manage/dashboard/dockercli) and use appropriate _env.cmd_ or _env.ps1_ scripts.
+>![UCP Client CMD](../images/UCP_Client_CMD.png)
+
 
 ```
 vagrant@enterprise-node3:~/admin-bundle$ source env.sh
@@ -306,7 +356,7 @@ DOCKER_CERT_PATH=/home/vagrant/admin-bundle
 
 We executed _env|egrep -e DOCKER -e KUBE_ to review the recently loaded variables.
 
-Now, all the commmands executed will be forwarded to the cluster. We will not use local Docker Engine. Let's execute a simple docker info and you will verify this.
+2 - Now, all the commmands executed will be forwarded to the cluster. We will not use local Docker Engine. Let's execute a simple docker info and you will verify this.
 ```
 vagrant@enterprise-node3:~/admin-bundle$ docker info
 Client:
