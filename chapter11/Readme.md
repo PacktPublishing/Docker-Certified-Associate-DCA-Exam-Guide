@@ -189,16 +189,23 @@ root@enterprise-node1:~#
 
 4 - We can now use our browser with _192.168.56.11_, which is the host-to-vm IP address. We will browse to _https://192.168.56.11_ (port 443 is used by default).
 
-![UCP Login](../images/UCP_Login.png)
+You will get a warning message because we are using autosigned-certificates. We used an auto-signed certificate, created with an internal CA, hence we will receive a security warning because our system will not trust this certificate. We will trust this certificate or simple follow your browser instructions to accept the risk and continue to our UCP's URL.
 
->NOTE: We used an auto-signed certificate, created with an internal CA, hence we will receive a security warning because our system will not trust this certificate. We will trust this certificate or simple follow your browser instructions to accept the risk and continue to our UCP's URL.
+![UCP Warning](../images/UCP_Warning.png)
+
+Login page will appear and we will use "admin" username and its password (defined during install).
+
+![UCP Login](../images/UCP_Login.png)
 
 >NOTE: We will be asked to upload our license. You signed on Docker Hub and you asked for a Trial. We will use this trial license for these labs.
 
 ![UCP Login License](../images/UCP_Login_License.png)
 
+5 - We will have access to UCP's Dashboard. Take few minutes to review all its content as described on chapter 11.
 
-5 - To join the rest of nodes we will just use learned _docker swarm join_ command. UCP is a Docker Swarm cluster, although Kubernetes is also included. All Docker Swarm commands can be used here.
+![UCP Dashboard](../images/UCP_Dashboard.png)
+
+6 - To join the rest of nodes we will just use learned _docker swarm join_ command. UCP is a Docker Swarm cluster, although Kubernetes is also included. All Docker Swarm commands can be used here.
 We will first get manager's join-token on enterprise-node1.
 
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
@@ -227,7 +234,7 @@ vagrant@enterprise-node3:~$ exit
 ```
 
 
-6 - Now we will joing enterprise-node4 as worker. We will ask Docker Swarm for the worker's token.
+7 - Now we will joing enterprise-node4 as worker. We will ask Docker Swarm for the worker's token.
 ```
 zero@antares:~/Labs/Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 
@@ -246,7 +253,7 @@ This node joined a swarm as a worker.
 vagrant@enterprise-node4:~$
 ```
 
-7 - Now we get back again to any of the manager nodes to review the cluster status.
+8 - Now we get back again to any of the manager nodes to review the cluster status.
 ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 
@@ -340,8 +347,8 @@ We will use enterprise-node3 node as client therefore we have used "Download adm
 
 1 - Let's connect our enterprise-node3 Docker client. We will load the environment file using _source_ built-in command because we are using Linux.
 
->NOTE: If you are following this lab form your laptop or any other Microsoft Windows-based environemnt you should previously install docker a client (can be downloaded from UCP's Web UI in this link https://192.168.56.11/manage/dashboard/dockercli) and use appropriate _env.cmd_ or _env.ps1_ scripts.
->![UCP Client CMD](../images/UCP_Client_CMD.png)
+>NOTE: If you are following this lab form your laptop or any other Microsoft Windows-based environemnt you should previously install docker a client (can be downloaded from UCP's Web UI in this link https://192.168.56.11/manage/dashboard/dockercli) and use appropriate _env.cmd_ or _env.ps1_ scripts. Clients can be downloaded from UCP, take a look at botton of UCP's Dashboard.
+>![UCP Client CMD](../images/UCP_Dashboard.png)
 
 
 ```
