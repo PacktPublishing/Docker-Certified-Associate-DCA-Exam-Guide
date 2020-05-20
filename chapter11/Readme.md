@@ -1,7 +1,7 @@
 # Chapter 11
 
 ## Lab1 - Install UCP cluster
-
+```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant status
 --------------------------------------------------------------------------------------------
  DOCKER ENTERPRISE Vagrant Environment
@@ -17,8 +17,10 @@ enterprise-node4          running (virtualbox)
 This environment represents multiple VMs. The VMs are all listed
 above with their current state. For more information about a specific
 VM, run `vagrant status NAME`.
+ ```
 
 
+ ```
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 --------------------------------------------------------------------------------------------
  DOCKER ENTERPRISE Vagrant Environment
@@ -27,7 +29,7 @@ Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh e
 ....
 ....
 
-vagrant@enterprise-node1:~$ 
+vagrant@enterprise-node1:~$
 
 vagrant@enterprise-node1:~$ sudo -s
 
@@ -46,6 +48,7 @@ stable-$DOCKER_EE_VERSION"
 root@enterprise-node1:~# apt-get update -qq
 
 root@enterprise-node1:~# apt-get install -qq docker-ee docker-ee-cli containerd.io
+ ```
 
 Repeat above steps in enterprise-node2, enterprise-node3 and enterprise-node4.
 
@@ -55,6 +58,7 @@ Once Docker Enterprise Engine is installed on all cluster nodes, we can proced t
 Docker-Certified-Associate-DCA-Exam-Guide/environments/enterprise$ vagrant ssh enterprise-node1
 
 vagrant@enterprise-node1:~$ sudo -s
+ ```
 
 We will use ucp.vagrant.lab for the FQDN cluster name. Remember what we have learned in this chapter. If we were deploying this cluster on a real environment, we should be published UCP's FQDN's IP address on your external load balancer. In this lab we are just associating UCP's FQDN's IP address with the IP address of the first cluster node (10.10.10.11). We will use _--san_ argument to add this FQDN.
 
@@ -72,87 +76,87 @@ root@enterprise-node1:~# docker container run --rm -it --name ucp \
 >   --admin-password changeme
 Unable to find image 'docker/ucp:3.2.5' locally
 3.2.5: Pulling from docker/ucp
-9d48c3bd43c5: Pull complete 
-90d4790e3bd7: Pull complete 
-f25d13a4f3b8: Pull complete 
+9d48c3bd43c5: Pull complete
+90d4790e3bd7: Pull complete
+f25d13a4f3b8: Pull complete
 Digest: sha256:e55a1428bbef6543d8aff87a71d998a69de202063fe785966dc9f40fed166bca
 Status: Downloaded newer image for docker/ucp:3.2.5
-INFO[0000] Your Docker daemon version 19.03.5, build 2ee0c57608 (4.4.0-116-generic) is compatible with UCP 3.2.5 (57c1024) 
-INFO[0000] Initializing New Docker Swarm                
-INFO[0000] Checking required ports for connectivity     
-INFO[0005] Checking required container images           
-INFO[0005] Pulling required images... (this may take a while) 
-INFO[0005] Pulling image: docker/ucp-agent:3.2.5        
-INFO[0009] Pulling image: docker/ucp-auth:3.2.5         
-INFO[0012] Pulling image: docker/ucp-auth-store:3.2.5   
-INFO[0019] Pulling image: docker/ucp-azure-ip-allocator:3.2.5 
-INFO[0022] Pulling image: docker/ucp-calico-cni:3.2.5   
-INFO[0030] Pulling image: docker/ucp-calico-kube-controllers:3.2.5 
-INFO[0034] Pulling image: docker/ucp-calico-node:3.2.5  
-INFO[0042] Pulling image: docker/ucp-cfssl:3.2.5        
-INFO[0045] Pulling image: docker/ucp-compose:3.2.5      
-INFO[0062] Pulling image: docker/ucp-controller:3.2.5   
-INFO[0073] Pulling image: docker/ucp-dsinfo:3.2.5       
-INFO[0075] Pulling image: docker/ucp-etcd:3.2.5         
-INFO[0080] Pulling image: docker/ucp-hyperkube:3.2.5    
-INFO[0098] Pulling image: docker/ucp-interlock:3.2.5    
-INFO[0100] Pulling image: docker/ucp-interlock-extension:3.2.5 
-INFO[0103] Pulling image: docker/ucp-interlock-proxy:3.2.5 
-INFO[0108] Pulling image: docker/ucp-interlock-config:3.2.5 
-INFO[0111] Pulling image: docker/ucp-kube-compose:3.2.5 
-INFO[0114] Pulling image: docker/ucp-kube-compose-api:3.2.5 
-INFO[0117] Pulling image: docker/ucp-kube-dns:3.2.5     
-INFO[0121] Pulling image: docker/ucp-kube-dns-dnsmasq-nanny:3.2.5 
-INFO[0124] Pulling image: docker/ucp-kube-dns-sidecar:3.2.5 
-INFO[0127] Pulling image: docker/ucp-metrics:3.2.5      
-INFO[0133] Pulling image: docker/ucp-pause:3.2.5        
-INFO[0135] Pulling image: docker/ucp-swarm:3.2.5        
-INFO[0138] Completed pulling required images            
-INFO[0141] Running install agent container ...          
-INFO[0000] Loading install configuration                
-INFO[0000] Running Installation Steps                   
-INFO[0000] Step 1 of 35: [Setup Internal Cluster CA]    
-INFO[0003] Step 2 of 35: [Setup Internal Client CA]     
-INFO[0003] Step 3 of 35: [Initialize etcd Cluster]      
-INFO[0007] Step 4 of 35: [Set Initial Config in etcd]   
-INFO[0007] Step 5 of 35: [Deploy RethinkDB Server]      
-INFO[0009] Step 6 of 35: [Initialize RethinkDB Tables]  
-INFO[0010] Step 7 of 35: [Create Auth Service Encryption Key Secret] 
-INFO[0010] Step 8 of 35: [Deploy Auth API Server]       
-INFO[0014] Step 9 of 35: [Setup Auth Configuration]     
-INFO[0015] Step 10 of 35: [Deploy Auth Worker Server]   
-INFO[0017] Step 11 of 35: [Deploy UCP Proxy Server]     
-INFO[0018] Step 12 of 35: [Initialize Swarm v1 Node Inventory] 
-INFO[0018] Step 13 of 35: [Deploy Swarm v1 Manager Server] 
-INFO[0018] Step 14 of 35: [Deploy Internal Cluster CA Server] 
-INFO[0019] Step 15 of 35: [Deploy Internal Client CA Server] 
-INFO[0020] Step 16 of 35: [Deploy UCP Controller Server] 
-INFO[0029] Step 17 of 35: [Deploy Kubernetes API Server] 
-INFO[0036] Step 18 of 35: [Deploy Kubernetes Controller Manager] 
-INFO[0040] Step 19 of 35: [Deploy Kubernetes Scheduler] 
-INFO[0044] Step 20 of 35: [Deploy Kubelet]              
-INFO[0044] Step 21 of 35: [Deploy Kubernetes Proxy]     
-INFO[0045] Step 22 of 35: [Wait for Healthy UCP Controller and Kubernetes API] 
-INFO[0045] Step 23 of 35: [Create Kubernetes Pod Security Policies] 
-INFO[0046] Step 24 of 35: [Install Kubernetes CNI Plugin] 
-INFO[0076] Step 25 of 35: [Install KubeDNS]             
-INFO[0077] Step 26 of 35: [Create UCP Controller Kubernetes Service Endpoints] 
-INFO[0079] Step 27 of 35: [Install Metrics Plugin]      
-INFO[0081] Step 28 of 35: [Install Kubernetes Compose Plugin] 
-INFO[0086] Step 29 of 35: [Deploy Manager Node Agent Service] 
-INFO[0086] Step 30 of 35: [Deploy Worker Node Agent Service] 
-INFO[0086] Step 31 of 35: [Deploy Windows Worker Node Agent Service] 
-INFO[0086] Step 32 of 35: [Deploy Cluster Agent Service] 
-INFO[0086] Step 33 of 35: [Set License]                 
-INFO[0086] Step 34 of 35: [Set Registry CA Certificates] 
-INFO[0086] Step 35 of 35: [Wait for All Nodes to be Ready] 
-INFO[0091] All Installation Steps Completed             
-root@enterprise-node1:~# 
+INFO[0000] Your Docker daemon version 19.03.5, build 2ee0c57608 (4.4.0-116-generic) is compatible with UCP 3.2.5 (57c1024)
+INFO[0000] Initializing New Docker Swarm
+INFO[0000] Checking required ports for connectivity
+INFO[0005] Checking required container images
+INFO[0005] Pulling required images... (this may take a while)
+INFO[0005] Pulling image: docker/ucp-agent:3.2.5
+INFO[0009] Pulling image: docker/ucp-auth:3.2.5
+INFO[0012] Pulling image: docker/ucp-auth-store:3.2.5
+INFO[0019] Pulling image: docker/ucp-azure-ip-allocator:3.2.5
+INFO[0022] Pulling image: docker/ucp-calico-cni:3.2.5
+INFO[0030] Pulling image: docker/ucp-calico-kube-controllers:3.2.5
+INFO[0034] Pulling image: docker/ucp-calico-node:3.2.5
+INFO[0042] Pulling image: docker/ucp-cfssl:3.2.5
+INFO[0045] Pulling image: docker/ucp-compose:3.2.5
+INFO[0062] Pulling image: docker/ucp-controller:3.2.5
+INFO[0073] Pulling image: docker/ucp-dsinfo:3.2.5
+INFO[0075] Pulling image: docker/ucp-etcd:3.2.5
+INFO[0080] Pulling image: docker/ucp-hyperkube:3.2.5
+INFO[0098] Pulling image: docker/ucp-interlock:3.2.5
+INFO[0100] Pulling image: docker/ucp-interlock-extension:3.2.5
+INFO[0103] Pulling image: docker/ucp-interlock-proxy:3.2.5
+INFO[0108] Pulling image: docker/ucp-interlock-config:3.2.5
+INFO[0111] Pulling image: docker/ucp-kube-compose:3.2.5
+INFO[0114] Pulling image: docker/ucp-kube-compose-api:3.2.5
+INFO[0117] Pulling image: docker/ucp-kube-dns:3.2.5
+INFO[0121] Pulling image: docker/ucp-kube-dns-dnsmasq-nanny:3.2.5
+INFO[0124] Pulling image: docker/ucp-kube-dns-sidecar:3.2.5
+INFO[0127] Pulling image: docker/ucp-metrics:3.2.5
+INFO[0133] Pulling image: docker/ucp-pause:3.2.5
+INFO[0135] Pulling image: docker/ucp-swarm:3.2.5
+INFO[0138] Completed pulling required images
+INFO[0141] Running install agent container ...
+INFO[0000] Loading install configuration
+INFO[0000] Running Installation Steps
+INFO[0000] Step 1 of 35: [Setup Internal Cluster CA]
+INFO[0003] Step 2 of 35: [Setup Internal Client CA]
+INFO[0003] Step 3 of 35: [Initialize etcd Cluster]
+INFO[0007] Step 4 of 35: [Set Initial Config in etcd]
+INFO[0007] Step 5 of 35: [Deploy RethinkDB Server]
+INFO[0009] Step 6 of 35: [Initialize RethinkDB Tables]
+INFO[0010] Step 7 of 35: [Create Auth Service Encryption Key Secret]
+INFO[0010] Step 8 of 35: [Deploy Auth API Server]
+INFO[0014] Step 9 of 35: [Setup Auth Configuration]
+INFO[0015] Step 10 of 35: [Deploy Auth Worker Server]
+INFO[0017] Step 11 of 35: [Deploy UCP Proxy Server]
+INFO[0018] Step 12 of 35: [Initialize Swarm v1 Node Inventory]
+INFO[0018] Step 13 of 35: [Deploy Swarm v1 Manager Server]
+INFO[0018] Step 14 of 35: [Deploy Internal Cluster CA Server]
+INFO[0019] Step 15 of 35: [Deploy Internal Client CA Server]
+INFO[0020] Step 16 of 35: [Deploy UCP Controller Server]
+INFO[0029] Step 17 of 35: [Deploy Kubernetes API Server]
+INFO[0036] Step 18 of 35: [Deploy Kubernetes Controller Manager]
+INFO[0040] Step 19 of 35: [Deploy Kubernetes Scheduler]
+INFO[0044] Step 20 of 35: [Deploy Kubelet]
+INFO[0044] Step 21 of 35: [Deploy Kubernetes Proxy]
+INFO[0045] Step 22 of 35: [Wait for Healthy UCP Controller and Kubernetes API]
+INFO[0045] Step 23 of 35: [Create Kubernetes Pod Security Policies]
+INFO[0046] Step 24 of 35: [Install Kubernetes CNI Plugin]
+INFO[0076] Step 25 of 35: [Install KubeDNS]
+INFO[0077] Step 26 of 35: [Create UCP Controller Kubernetes Service Endpoints]
+INFO[0079] Step 27 of 35: [Install Metrics Plugin]
+INFO[0081] Step 28 of 35: [Install Kubernetes Compose Plugin]
+INFO[0086] Step 29 of 35: [Deploy Manager Node Agent Service]
+INFO[0086] Step 30 of 35: [Deploy Worker Node Agent Service]
+INFO[0086] Step 31 of 35: [Deploy Windows Worker Node Agent Service]
+INFO[0086] Step 32 of 35: [Deploy Cluster Agent Service]
+INFO[0086] Step 33 of 35: [Set License]
+INFO[0086] Step 34 of 35: [Set Registry CA Certificates]
+INFO[0086] Step 35 of 35: [Wait for All Nodes to be Ready]
+INFO[0091] All Installation Steps Completed
+root@enterprise-node1:~#
 ```
 
 We can now use our browser with _192.168.56.11_, which is the host-to-vm IP address. We will browse to _https://192.168.56.11_ (port 443 is used by default).
 
-__IMAGE__
+![UCP Login](../images/chapter3.png)
 
 >NOTE: We used an auto-signed certificate, created with an internal CA, hence we will receive a security warning because our system will not trust this certificate. We will trust this certificate or simple follow your browser instructions to accept the risk and continue to our UCP's URL.
 
@@ -253,23 +257,23 @@ vagrant@enterprise-node3:~$ mv ucp-bundle-admin.zip admin-bundle/
 
 vagrant@enterprise-node3:~$ cd admin-bundle/
 
-vagrant@enterprise-node3:~/admin-bundle$ unzip ucp-bundle-admin.zip 
+vagrant@enterprise-node3:~/admin-bundle$ unzip ucp-bundle-admin.zip
 Archive:  ucp-bundle-admin.zip
- extracting: ca.pem                  
- extracting: cert.pem                
- extracting: key.pem                 
- extracting: cert.pub                
- extracting: env.ps1                 
- extracting: env.cmd                 
- extracting: kube.yml                
- extracting: env.sh                  
- extracting: meta.json               
- extracting: tls/docker/ca.pem       
- extracting: tls/docker/cert.pem     
- extracting: tls/docker/key.pem      
- extracting: tls/kubernetes/ca.pem   
- extracting: tls/kubernetes/cert.pem  
- extracting: tls/kubernetes/key.pem  
+ extracting: ca.pem
+ extracting: cert.pem
+ extracting: key.pem
+ extracting: cert.pub
+ extracting: env.ps1
+ extracting: env.cmd
+ extracting: kube.yml
+ extracting: env.sh
+ extracting: meta.json
+ extracting: tls/docker/ca.pem
+ extracting: tls/docker/cert.pem
+ extracting: tls/docker/key.pem
+ extracting: tls/kubernetes/ca.pem
+ extracting: tls/kubernetes/cert.pem
+ extracting: tls/kubernetes/key.pem
 ```
 
 ### Download admin's UCP bundle using your browser.
@@ -283,10 +287,10 @@ Locate your __"ucp-bundle-admin.zip"__ file and then you can follow the same ste
 
 >NOTE: Client bundle will work for Linux, Windows and MacOSX docker clients. Obtaining this zip file may vary on different systems but you should get the same results.
 
-__"ucp-bundle-admin.zip"__ package contains client certificates required to connect to out cluster. This will allow us to connect to either Docker Swarm or Kubernetes environments. 
+__"ucp-bundle-admin.zip"__ package contains client certificates required to connect to out cluster. This will allow us to connect to either Docker Swarm or Kubernetes environments.
 
 There are environment files to load variables in our session to help us include all the values required.
-Let's connect our enterprise-node3 Docker client. We will load the environment file using source because we are using Linux. 
+Let's connect our enterprise-node3 Docker client. We will load the environment file using source because we are using Linux.
 
 >NOTE: If you are following this lab form your laptop or any other Microsoft Windows-based environemnt you should previously install docker a client (can be downloaded from UCP's Web UI in this link https://192.168.56.11/manage/dashboard/dockercli) and use appropriate _env.cmd_ or _env.ps1_ scripts.
 
@@ -374,16 +378,16 @@ Server:
    └ Engine Swarm Manager: tcp://10.10.10.12:12376
    └ KV: etcd://10.10.10.12:12379
  Plugins:
-  Volume: 
-  Network: 
-  Log: 
+  Volume:
+  Network:
+  Log:
  Swarm: active
   NodeID: fwq6bd8h7dz9o99sg84gk8eex
   Is Manager: true
   ClusterID: t4xq3t5ybzp3biqxtsy8fkuo1
   Managers: 3
   Nodes: 4
-  Default Address Pool: 10.0.0.0/8  
+  Default Address Pool: 10.0.0.0/8
   SubnetSize: 24
   Data Path Port: 4789
   Orchestration:
@@ -416,7 +420,7 @@ Server:
  Total Memory: 16.21GiB
  Name: ucp-controller-10.10.10.11
  ID: t4xq3t5ybzp3biqxtsy8fkuo1
- Docker Root Dir: 
+ Docker Root Dir:
  Debug Mode: false
  Registry: https://index.docker.io/v1/
  Labels:
