@@ -1,0 +1,15 @@
+version: "3.2"
+services:
+  colors:
+    image: codegazers/colors:1.16
+    deploy:
+      replicas: 3
+      labels:
+        com.docker.lb.hosts: colors.lab.local
+        com.docker.lb.network: colors-network
+        com.docker.lb.port: 3000
+    networks:
+      - colors-network
+
+networks:
+  colors-network:

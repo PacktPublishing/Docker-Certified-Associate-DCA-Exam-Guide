@@ -1,0 +1,16 @@
+version: "3.2"
+services:
+  black:
+    image: codegazers/colors:1.16
+    environment:
+      COLOR: "black"
+    deploy:
+      replicas: 1
+      labels:
+        com.docker.lb.default_backend: "true"
+        com.docker.lb.port: 3000
+    networks:
+      - black-network
+
+networks:
+  black-network:
