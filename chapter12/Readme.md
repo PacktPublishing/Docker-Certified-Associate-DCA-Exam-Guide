@@ -405,4 +405,137 @@ Let's deploy something more complicated.
 
 ## __Lab3__: Simple application redirection.
 
-In this lab we will enable redirection for .
+In this lab we will enable redirection for a website migration for example. We will forward all requests send to http://old.lab.local to a new webserver publishing http://new.lab.local. Instead of stacks, for this quick lab we will use simple services. Remember that is recommended to use stacks instead of services for production because stack files can be stored on git environments to follow common CI/CD releases numbers.
+
+>__NOTE: All these labs should be executed connected to your UCP cluster using UCP's bundle. In these labs we are using enterprise-node3 because we downloaded the admin user's bundle in previous chapters' labs.__
+
+1 - First we will create an overaly network because Interlock needs to be able to forward requests to our new service. Interlock's proxy component will connect to this network and forward requests to our new application's backends.
+```
+vagrant@enterprise-node3:~$ docker network create -d overlay redirect
+```
+
+2 - Now we will create out new webserver service. For this example to work it is not necessary to include an old webserver because all requests will be forwarded to the new one.
+```
+vagrant@enterprise-node3:~$  docker service create --name new-webserver \
+--network redirect \
+--label com.docker.lb.hosts=old.lab.local,new.lab.local \
+--label com.docker.lb.port=80 \
+--label com.docker.lb.redirects=http://old.lab.local,http://new.lab.local \
+nginx:alpine
+```
+
+3 - Now we will test new.lab.local and old.lab.local URLs and review their results:
+```
+vagrant@enterprise-node3:~$ curl -H "host: new.lab.local" 0.0.0.0:8080
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+new.lab.local works as expected. Let's test old.lab.local.
+
+```
+vagrant@enterprise-node3:~/admin-bundle$ curl -H "host: old.lab.local" 0.0.0.0:8080
+<html>
+<head><title>302 Found</title></head>
+<body bgcolor="white">
+<center><h1>302 Found</h1></center>
+<hr><center>nginx/1.14.2</center>
+</body>
+</html>
+```
+
+We have a redirection therefore we must add ___-L___ to ___curl___ to follow redirections (if you tested using your web browser you will probably be already redirected and you will have a DNS resolution error if you didn't add new.lab.local).
+```
+vagrant@enterprise-node3:~$ curl -L -H "host: old.lab.local" 0.0.0.0:8080
+curl: (6) Could not resolve host: new.lab.local
+```
+
+This error is normal because we have been redirected but we are using host headers to manage curl requests. In this case it is not enough. To solve this issue we should resolve new.lab.local resolution to any of the hosts included in UCP's cluster.
+
+Redirection worked as expected.
+
+4 - We remove now our new-webserver service and redirect network (remember that overlay network will not be removed until interlock-proxy service is reloaded with the new changes). 
+```
+vagrant@enterprise-node3:~$ docker service remove new-webserver
+new-webserver
+```
+
+If you wait some seconds (30s) you will be able to remove redirect overlay network without any issue.
+```
+vagrant@enterprise-node3:~$ docker network rm redirect
+redirect
+```
+
+## __Lab4__:Publishing a service securely using Interlock with TLS
+
+In this lab we will enable certificates for a "RED COLOR" application.
+
+1 - First we will create our application's certificate. We have to ensure that our FQDN application's hostname is included in the certificate. We will use ___openssl___ with a simple CName to include "red.lab.local".
+```
+vagrant@enterprise-node3:~$ openssl req -x509 \
+-nodes -days 3650 -newkey rsa:2048 \
+-keyout red.lab.local.key -out red.lab.local.crt -subj "/CN=red.lab.local"
+```
+
+2 - Now we will prepare our RED COLOR application's stack [red-ssl.stack.yaml](./red-ssl.stack.yaml). Use your favorite editor and create __red-ssl-.stack.yaml__ on enterprise-node3:
+```
+version: "3.2"
+services:
+    red:
+        image: codegazers/colors:1.16
+        environment:
+          COLOR: "red"
+        deploy:
+            replicas: 1
+            labels:
+                com.docker.lb.hosts: red.lab.local
+                com.docker.lb.network: red-network
+                com.docker.lb.port: 3000
+                com.docker.lb.ssl_cert: red_red.lab.local.cert
+                com.docker.lb.ssl_key: red_red.lab.local.key
+        networks:
+        - red-network
+networks:
+    red-network:
+        driver: overlay
+secrets:
+    red.lab.local.cert:
+        file: ./red.lab.local.cert
+    red.lab.local.key:
+        file: ./red.lab.local.key
+```
+
+3 - We now deploy this new stack:
+```
+vagrant@enterprise-node3:~$ docker stack deploy -c red-ssl.stack.yaml red
+Creating network red_red-network
+Creating secret red_colors.lab.local.key
+Creating secret red_colors.lab.local.cert
+Creating service red_red
+vagrant@enterprise-node3:~$ 
+```
+
+4 - 
