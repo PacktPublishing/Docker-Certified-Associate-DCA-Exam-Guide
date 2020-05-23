@@ -1,7 +1,5 @@
 # Chapter 12
 
-# Chapter 11
-
 ## Previous requirements
 In this chapter we will learn Docker Swarm orchestrator features. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant Docker Enterprise environment or any already deployed Docker Enteprise cluster at your own. Check additional information in this book's github code repository available in this link https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git.
 
@@ -180,9 +178,10 @@ networks:
 ```
 
 >__NOTE: You can also clone [Docker-Certified-Associate-DCA-Exam-Guide](https://github.com/frjaraur/Docker-Certified-Associate-DCA-Exam-Guide.git) books' Github code repository.__
+>
 
 
->__NOTE: We can also use this simple trick:
+>__NOTE: We can also use this simple trick:__
 >
 >```
 >cat <<-EOF>default-color.stack.yaml
@@ -203,9 +202,10 @@ networks:
 >
 >networks:
 >  black-network:
-
+>
 >EOF
 >```
+
 
 6 - We now create this default stack.
 ```
