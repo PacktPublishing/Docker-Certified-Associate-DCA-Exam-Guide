@@ -489,53 +489,6 @@ vagrant@enterprise-node3:~$ docker network rm redirect
 redirect
 ```
 
-## __Lab4__:Publishing a service securely using Interlock with TLS
+You can have more examples and configurations visiting Docker's Interlock section.
 
-In this lab we will enable certificates for a "RED COLOR" application.
-
-1 - First we will create our application's certificate. We have to ensure that our FQDN application's hostname is included in the certificate. We will use ___openssl___ with a simple CName to include "red.lab.local".
-```
-vagrant@enterprise-node3:~$ openssl req -x509 \
--nodes -days 3650 -newkey rsa:2048 \
--keyout red.lab.local.key -out red.lab.local.crt -subj "/CN=red.lab.local"
-```
-
-2 - Now we will prepare our RED COLOR application's stack [red-ssl.stack.yaml](./red-ssl.stack.yaml). Use your favorite editor and create __red-ssl-.stack.yaml__ on enterprise-node3:
-```
-version: "3.2"
-services:
-    red:
-        image: codegazers/colors:1.16
-        environment:
-          COLOR: "red"
-        deploy:
-            replicas: 1
-            labels:
-                com.docker.lb.hosts: red.lab.local
-                com.docker.lb.network: red-network
-                com.docker.lb.port: 3000
-                com.docker.lb.ssl_cert: red_red.lab.local.cert
-                com.docker.lb.ssl_key: red_red.lab.local.key
-        networks:
-        - red-network
-networks:
-    red-network:
-        driver: overlay
-secrets:
-    red.lab.local.cert:
-        file: ./red.lab.local.cert
-    red.lab.local.key:
-        file: ./red.lab.local.key
-```
-
-3 - We now deploy this new stack:
-```
-vagrant@enterprise-node3:~$ docker stack deploy -c red-ssl.stack.yaml red
-Creating network red_red-network
-Creating secret red_colors.lab.local.key
-Creating secret red_colors.lab.local.cert
-Creating service red_red
-vagrant@enterprise-node3:~$ 
-```
-
-4 - 
+- [https://docs.docker.com/ee/ucp/interlock/usage](https://docs.docker.com/ee/ucp/interlock/usage/)
