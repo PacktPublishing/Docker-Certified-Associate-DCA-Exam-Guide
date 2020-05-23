@@ -53,7 +53,7 @@ VM, run `vagrant status NAME`.
 
 In this lab we will enable Interlock on Docker Enterprise cluster and we will review its components. Interlock's components were described in chapter 12.
 
->__NOTE: For easy access, add "192.168.56.11 ucp.vagrant.labs" to your hosts file.__This will help us accessing UCP directly. We prepared the environment with internal resolution. It will work for you.
+>NOTE: For easy access, add "192.168.56.11 ucp.vagrant.labs" to your hosts file. This will help us accessing UCP directly. We prepared the environment with internal resolution. It will work for you.
 
 1 - Connect to our already deployed Docker Enterprise's UCP's Web UI. If you are using the provided Vagrant environment your UCP Web UI will be accesible in https://ucp.vagrant.labs (we haven't used any external load balancer for these labs, therefore this FQDN points to first node's IP address). If you haven't changed installation's "admin" user's password it will be "changeme". We will get into "admin" > "Admin Settings" configuration settings. Notice that "Admin Settings" menu will be available to any UCP's administrator user. In fact you will find these settings inside each administrator's username menu.
 
