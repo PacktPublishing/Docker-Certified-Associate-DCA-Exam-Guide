@@ -1,11 +1,11 @@
 # Chapter 11
 
 ## Previous requirements
-In this chapter we will learn Docker Swarm orchestrator features. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant Docker Swarm environment or any already deployed Docker Swarm cluster at your own. Check additional information in this book's github code repository available in this link https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git.
+In this chapter we will learn Docker Swarm orchestrator features. We provide some labs at the end of the chapter that will help you understand and learn shown concepts. These labs can be run on your laptop or PC using the provided vagrant Docker Enterprise environment or any already deployed Docker Enteprise cluster at your own. Check additional information in this book's github code repository available in this link https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git.
 
 You will need at least (all labs were tested on Linux and Windows):
 
-    - Interne connection.
+    - Internet connection.
     - Some Linux, MacOS or Windows basic skills to edit files (using Notepad, Vim, Emacs or any other editor).
     - Git command-line, Vagrant and Virtualbox installed on your PC or laptop.
     - Already cloned book' s repository https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git.
@@ -14,7 +14,7 @@ You will need at least (all labs were tested on Linux and Windows):
 Extended instructions can be found on Github book's repository. These labs will use "environments/enterprise" folder for the creation of the virtual environment and "chapter8" folder.
 >NOTE: To clone book' s repository https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git, prepare a directory on your laptop or PC and execute git clone https://github.com/PacktPublishing/Docker-Certified-Associate-DCA-Exam-Guide.git. This will download all required files on your current folder.
 
-All labs will start executing vagrant up  using your command-line from the environment directory "environments/swarm". This command will start all the required nodes for you. If you are using your own Docker Enterprise cluster, you can use "chapter11" folder. Ask your Docker administrator for the cluster-required credentials for your environment to execute the provided labs.
+All labs will start executing vagrant up  using your command-line from the environment directory "environments/enterprise". This command will start all the required nodes for you. If you are using your own Docker Enterprise cluster, you can use "chapter11" folder. Ask your Docker administrator for the cluster-required credentials for your environment to execute the provided labs.
 
 Once all environment nodes are up and running, go to "chapter11" folder and follow each lab instructions.
 
