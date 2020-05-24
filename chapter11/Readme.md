@@ -492,6 +492,308 @@ Server:
 WARNING: No kernel memory limit support
 ```
 
+## Lab4 - Create DBA and Middleware users and Teams.
+
+1 - We will use UCP's Web UI, navigating to "Access Control" > "Users" page using "admin" user.
+
+![UCP Access Control Users](../images/UCP_AccessControl_Users.png)
+
+2 - We click on "Create" button to create "dba1" and "middleware1" users. 
+
+Fill user's name and password fields and hit create.
+
+![UCP Create Users](../images/UCP_CreateUsers.png)
+
+3 - Create "DBA" and "MiddleWare" teams navigating to "Access Control" > "Orgs. and Teams" page.
+
+First we create "labs" organization.
+
+![UCP Create Organization](../images/UCP_CreateOrganization.png)
+
+Then, inside "labs" organization, navigating click in the organization, we will create "DBA" and "Middelware" teams by click "+" sign.
+
+![UCP Create Teams](../images/UCP_CreateTeams_done.png)
+
+4 - Now we add users to their teams.
+We select "DBA" team and click on dots (properties).
+
+![UCP Create Teams](../images/UCP_AddUserToTeam_1.png)
+
+Then, we add "dba1" user.
+
+![UCP Add User to Team](../images/UCP_AddUserToTeam_2.png)
+
+Then we follow the same procedute to include "middleware1" user into "Middleware" team. And we will have one user per group for this lab.
+
+![UCP Review Teams](../images/UCP_AddUserToTeam_done.png)
 
 
+5 - Download dba1 and middleware1 UCP's bundles on enterprise-node3. We learned this process in the second lab.
+
+We follow the simplest method:
+```
+vagrant@enterprise-node3:~$ mkdir ucp-bundle-dba1  ucp-bundle-middleware1 
+
+vagrant@enterprise-node3:~$ AUTHTOKEN=$(curl -sk -d '{"username":"dba1","password":"changeme"}' https://ucp.vagrant.labs/auth/login | jq -r .auth_token);echo ${AUTHTOKEN}
+
+vagrant@enterprise-node3:~$ curl -sk -H "Authorization: Bearer $AUTHTOKEN" https://ucp.vagrant.labs/api/clientbundle -o ucp-bundle-dba1.zip
+
+vagrant@enterprise-node3:~$ unzip -d ucp-bundle-dba1 ucp-bundle-dba1.zip
+Archive:  ucp-bundle-dba1.zip
+ extracting: ucp-bundle-dba1/ca.pem  
+ extracting: ucp-bundle-dba1/cert.pem  
+ extracting: ucp-bundle-dba1/key.pem  
+ extracting: ucp-bundle-dba1/cert.pub  
+ extracting: ucp-bundle-dba1/env.ps1  
+ extracting: ucp-bundle-dba1/env.cmd  
+ extracting: ucp-bundle-dba1/kube.yml  
+ extracting: ucp-bundle-dba1/env.sh  
+ extracting: ucp-bundle-dba1/meta.json  
+ extracting: ucp-bundle-dba1/tls/docker/ca.pem  
+ extracting: ucp-bundle-dba1/tls/docker/cert.pem  
+ extracting: ucp-bundle-dba1/tls/docker/key.pem  
+ extracting: ucp-bundle-dba1/tls/kubernetes/ca.pem  
+ extracting: ucp-bundle-dba1/tls/kubernetes/cert.pem  
+ extracting: ucp-bundle-dba1/tls/kubernetes/key.pem  
+```
+
+For "middleware1" user we will follow the same procedure.
+
+vagrant@enterprise-node3:~$ AUTHTOKEN=$(curl -sk -d '{"username":"middleware1","password":"changeme"}' https://ucp.vagrant.labs/auth/login | jq -r .auth_token);echo ${AUTHTOKEN}
+08b5d890-3560-4cf5-a722-2b712f6a87ae
+
+vagrant@enterprise-node3:~$ curl -sk -H "Authorization: Bearer $AUTHTOKEN" https://ucp.vagrant.labs/api/clientbundle -o ucp-bundle-middleware1.zip
+
+vagrant@enterprise-node3:~$ unzip -d ucp-bundle-middleware1 ucp-bundle-middleware1.zipArchive:  ucp-bundle-middleware1.zip
+ extracting: ucp-bundle-middleware1/ca.pem  
+ extracting: ucp-bundle-middleware1/cert.pem  
+ extracting: ucp-bundle-middleware1/key.pem  
+ extracting: ucp-bundle-middleware1/cert.pub  
+ extracting: ucp-bundle-middleware1/env.sh  
+ extracting: ucp-bundle-middleware1/env.ps1  
+ extracting: ucp-bundle-middleware1/env.cmd  
+ extracting: ucp-bundle-middleware1/kube.yml  
+ extracting: ucp-bundle-middleware1/meta.json  
+ extracting: ucp-bundle-middleware1/tls/kubernetes/ca.pem  
+ extracting: ucp-bundle-middleware1/tls/kubernetes/cert.pem  
+ extracting: ucp-bundle-middleware1/tls/kubernetes/key.pem  
+ extracting: ucp-bundle-middleware1/tls/docker/ca.pem  
+ extracting: ucp-bundle-middleware1/tls/docker/cert.pem  
+ extracting: ucp-bundle-middleware1/tls/docker/key.pem  
+
+```
+
+6 - Now we can access as dba1 and middleware1 users. Let's verify their default permissions.
+Using dba1 user we will create the secrets required for deploying a database for developing applications.
+```
+vagrant@enterprise-node3:~/ucp-bundle-dba1$ source env.sh 
+
+vagrant@enterprise-node3:~/ucp-bundle-dba1$ echo mysuperpassword|docker secret create postgresql_root_passwd -
+2qogm9jtrdj3fwiu3bjihdqgk
+
+vagrant@enterprise-node3:~/ucp-bundle-dba1$ docker secret ls
+ID                          NAME                     DRIVER              CREATED             UPDATED
+2qogm9jtrdj3fwiu3bjihdqgk   postgresql_root_passwd                       13 seconds ago      13 seconds ago
+```
+
+You may notice that only this user (and UCP's administrators) is able to use this secret. In fact it is only visible for this user.
+We can verify this access using "middleware1" user.
+```
+vagrant@enterprise-node3:~/ucp-bundle-middleware1$ source env.sh 
+
+vagrant@enterprise-node3:~/ucp-bundle-middleware1$ docker secret ls
+ID                  NAME                DRIVER              CREATED             UPDATED
+```
+
+7 - Let's create another secret that is shared between both users. We will create a Collection shared for "DBA" and "Middleware" teams.
+We navigate to "Shared Resources" > "Collections" and then click on "View Children". This will show us all the collections inside "Swarm" parent collection.
+
+![UCP Review Collections](../images/UCP_Collections.png)
+
+We will navigate following this process to reach Collections/Swarm/Shared/Private. There, we will create "Databases" collection.
+
+![UCP Create New Collection](../images/UCP_CreateCollection.png)
+
+8 - Now we will create new Grants for "DBA" and "Middleware" teams.
+We navigate to "Access Control" > "Grants".
+
+![UCP Create New Collection](../images/UCP_CreateGrant.png)
+
+First we will create "Full Control" grant for "DBA" team on Databases collection.
+
+![UCP Create New Collection](../images/UCP_CreateGrant_DBA.png)
+
+And then we will create "Restricted Control" grant for "Middleware" team on Databases collection.
+
+The final picture will look like the following image:
+
+![UCP Create New Collection](../images/UCP_CreateGrant_all.png)
+
+9 - Let's create now a new secret under "Collections/Swarm/Shared/Private/Databases" collection.
+```
+vagrant@enterprise-node3:~$ cd
+
+vagrant@enterprise-node3:~$ cd ucp-bundle-dba1/
+
+vagrant@enterprise-node3:~/ucp-bundle-dba1$ source env.sh 
+
+vagrant@enterprise-node3:~/ucp-bundle-dba1$ echo mysuperpassword|docker secret create \
+--label com.docker.ucp.access.label="/Shared/Private/Databases" \
+shared_postgresql_root_passwd -
+
+lj4n7548l0xsju22640ec4djr
+```
+
+We will list all available secrets for "dba1" user:
+```
+vagrant@enterprise-node3:~/ucp-bundle-dba1$ docker secret ls
+ID                          NAME                            DRIVER              CREATED              UPDATED
+2qogm9jtrdj3fwiu3bjihdqgk   postgresql_root_passwd                              55 minutes ago       55 minutes ago
+lj4n7548l0xsju22640ec4djr   shared_postgresql_root_passwd                       About a minute ago   About a minute ago
+```
+
+10 - Let's review now if "middleware1" user has access to this new secret.
+```
+vagrant@enterprise-node3:~$ cd ucp-bundle-middleware1/
+
+vagrant@enterprise-node3:~/ucp-bundle-middleware1$ source env.sh 
+
+vagrant@enterprise-node3:~/ucp-bundle-middleware1$ docker secret ls
+ID                          NAME                            DRIVER              CREATED             UPDATED
+lj4n7548l0xsju22640ec4djr   shared_postgresql_root_passwd                       3 minutes ago       3 minutes ago
+```
+
+As we have noticed, "middleware1" user, included in "Middleware" team, has now access to "shared_postgresql_root_passwd" because "DBA" and "Middleware" teams have access to "Databases" collection. Groups have different accesses to this collection and therefore "middleware1" user can use the provided password, but only "DBA" team's users can manage resources in this collection.
+
+11 - We will create a simple database service using a simple stack.
+First we create "mydatabase" directory in our home directory.
+```
+vagrant@enterprise-node3:~$ cd
+
+vagrant@enterprise-node3:~$ mkdir middlewaredb
+
+vagrant@enterprise-node3:~$ ls -lart /home/vagrant/middlewaredb/
+total 8
+drwxr-xr-x 9 vagrant vagrant 4096 May 24 18:14 ..
+drwxrwxr-x 2 vagrant vagrant 4096 May 24 18:14 .
+```
+
+Then we will create our [middlewaredb.stack.yml](./middlewaredb.stack.yml) deployment file using our favorite editor.
+
+```
+version: '3.7'
+
+services:
+
+  middlewaredb:
+    image: postgres:alpine
+    secrets:
+      - shared_postgresql_root_passwd
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.hostname == enterprise-node3]
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+    ports:
+      - 5432:5432
+    networks:
+      - middleware_network
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: shared_postgresql_root_passwd
+      POSTGRES_DB: 'postgres_db'
+    volumes:
+      - type: bind
+        source: /home/vagrant/middlewaredb/
+        target: /var/lib/postgresql/data
+
+networks:
+  middleware_network:
+
+secrets:
+  shared_postgresql_root_passwd:
+    external: true
+```
+
+12 - Now we deploy this stack file.
+``` 
+vagrant@enterprise-node3:~$ cd 
+
+vagrant@enterprise-node3:~$ cd ucp-bundle-middleware1/
+
+vagrant@enterprise-node3:~/ucp-bundle-middleware1$ source env.sh 
+
+vagrant@enterprise-node3:~/ucp-bundle-middleware1$ cd 
+
+vagrant@enterprise-node3:~$ docker stack deploy -c middlewaredb.stack.yml shared
+Creating network shared_middleware_network
+Creating service shared_middlewaredb
+failed to create service shared_middlewaredb: Error response from daemon: access denied:
+no access to Service Create with [Host Bind Mounts], on collection 3be0c578-86d0-471e-8f26-01a074f03b11
+```
+
+We get this error because "middleware1" user can not create bind mount volumes ("Scheduler" role can not use bind mounts).
+We remove this stack and we will make few changes to deploy this stack.
+```
+vagrant@enterprise-node3:~$ docker stack rm shared
+Removing network shared_middleware_network
+```
+
+We will just remove "bind mount" volume feature or any volume creation [middlewaredb.stack.fixed.yml](./middlewaredb.stack.fixed.yml). "middleware1" user can not create volumes ("Restricted Control" role can note create volumes). We also removed placement constraints to allow orchestrator to schedule in worker nodes (manager nodes should be used just for administration tasks and only adminsitrators are allowed to run tasks on these nodes).
+```
+version: '3.7'
+
+services:
+
+  middlewaredb:
+    image: postgres:alpine
+    secrets:
+      - shared_postgresql_root_passwd
+    deploy:
+      labels:
+        com.docker.ucp.access.label: "/Shared/Private/Databases"
+      replicas: 1
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+    ports:
+      - 5432:5432
+    networks:
+      - middleware_network
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: shared_postgresql_root_passwd
+      POSTGRES_DB: 'postgres_db'
+
+networks:
+  middleware_network:
+
+secrets:
+  shared_postgresql_root_passwd:
+    external: true
+```
+
+We deploy the new fixed stack.
+```
+vagrant@enterprise-node3:~$ docker stack deploy -c middlewaredb.stack.fixed.yml shared         
+Creating network shared_middleware_network
+Creating service shared_middlewaredb
+
+vagrant@enterprise-node3:~$ docker service ls
+ID                  NAME                  MODE                REPLICAS            IMAGE               PORTS
+50woli84utid        shared_middlewaredb   replicated          1/1                 postgres:alpine     *:5432->5432/tcp
+```
+
+11 - We can now remove this stack to finish these labs.
+```
+vagrant@enterprise-node3:~$ docker stack rm shared
+Removing service shared_middlewaredb
+Removing network shared_middleware_network
+```
 
