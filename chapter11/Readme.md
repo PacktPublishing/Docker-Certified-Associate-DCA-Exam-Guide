@@ -558,7 +558,7 @@ Archive:  ucp-bundle-dba1.zip
 ```
 
 For "middleware1" user we will follow the same procedure.
-
+```
 vagrant@enterprise-node3:~$ AUTHTOKEN=$(curl -sk -d '{"username":"middleware1","password":"changeme"}' https://ucp.vagrant.labs/auth/login | jq -r .auth_token);echo ${AUTHTOKEN}
 08b5d890-3560-4cf5-a722-2b712f6a87ae
 
