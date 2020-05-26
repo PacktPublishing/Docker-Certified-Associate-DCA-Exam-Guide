@@ -1,0 +1,5 @@
+FROM nginx:alpine 
+RUN apk update -q
+RUN apk add \ 
+curl \ 
+httpie

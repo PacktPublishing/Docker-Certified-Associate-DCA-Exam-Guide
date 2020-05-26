@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+
+  middlewaredb:
+    image: postgres:alpine
+    secrets:
+      - shared_postgresql_root_passwd
+    deploy:
+      labels:
+        com.docker.ucp.access.label: "/Shared/Private/Databases"
+      replicas: 1
+      resources:
+        reservations:
+          memory: 128M
+        limits:
+          memory: 256M
+    ports:
+      - 5432:5432
+    networks:
+      - middleware_network
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: shared_postgresql_root_passwd
+      POSTGRES_DB: 'postgres_db'
+
+networks:
+  middleware_network:
+
+secrets:
+  shared_postgresql_root_passwd:
+    external: true

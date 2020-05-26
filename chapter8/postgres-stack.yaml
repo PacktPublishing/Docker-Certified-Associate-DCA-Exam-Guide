@@ -1,0 +1,52 @@
+version: '3.7'
+services:
+  database:
+    image: postgres:alpine
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+          - node.labels.tier == database
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    
+    secrets:
+      - source: postgres_password
+        target: "/run/secrets/postgres_password"  
+    
+    configs:
+      - source: create-docker-database
+        target: "/docker-entrypoint-initdb.d/create-db.sh"
+        mode: 0755
+        uid: "0"
+    volumes:
+      - type: volume
+        source: PGDATA
+        target: /var/lib/postgresql/data
+    ports:
+      - target: 5432
+        published: 15432
+        protocol: tcp
+    networks:
+      net:
+        aliases:
+         - postgres
+         - mydatabase
+
+configs:
+  create-docker-database:
+    external: true
+
+secrets:
+  postgres_password:
+    external: true
+
+volumes:
+  PGDATA:
+    external: true
+
+networks:
+  net:
+    driver: overlay
+    attachable: true
+

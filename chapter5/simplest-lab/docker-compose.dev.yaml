@@ -1,0 +1,58 @@
+version: "3.7"
+
+services:
+  lb:
+    build:
+      context: ./simplestlb
+      args:
+        alpineversion: "latest"
+      dockerfile: Dockerfile.custom
+      labels:
+        org.codegazers.dscription: "Test image"
+    image: ${dockerhubid}/simplest-lab:simplestlb
+    environment:
+      - APPLICATION_ALIAS=simplestapp
+      - APPLICATION_PORT=3000
+    networks:
+      simplestlab:
+          aliases:
+          - simplestlb
+    ports:
+      - "${LB_PORT}:80"
+
+  db:
+    build: simplestdb
+    image: myregistry/simplest-lab:simplestdb
+    environment:
+        - "POSTGRES_PASSWORD=changeme"
+    networks:
+       simplestlab:
+        aliases:
+          - simplestdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  app:
+    build: simplestapp
+    image: myregistry/simplest-lab:simplestapp
+    environment:
+      - dbhost=simplestdb
+      - dbname=demo
+      - dbuser=demo
+      - dbpasswd=d3m0
+    networks:
+       simplestlab:
+        aliases:
+          - simplestapp
+    depends_on:
+      - lb
+      - db
+
+volumes:
+  pgdata:
+
+networks:
+  simplestlab:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/16

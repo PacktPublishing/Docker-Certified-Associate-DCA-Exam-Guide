@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: webserver
+  name: webserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webserver
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: webserver
+    spec:
+      nodeName: kubernetes-node2
+      containers:
+      - image: codegazers/nginx-lab:1.2
+        env:
+        - name: HTMLDIR
+          value: /wwwroot
+        - name: PAGETITLE
+          valueFrom:
+            secretKeyRef:
+              name: webserver-secret
+              key: PAGETITLE
+        - name: PAGEBODY
+          valueFrom:
+            secretKeyRef:
+              name: webserver-secret
+              key: PAGEBODY
+        name: nginx
+        resources: {}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d/
+        - mountPath: /var/log/nginx
+          name: empty-volume
+          readOnly: false
+        - mountPath: /wwwroot
+          name: data-volume          
+      volumes:
+      - name: config-volume
+        configMap:
+          name: webserver-test-config
+      - name: empty-volume
+        emptyDir: {}
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: werbserver-pvc
+
+status: {}

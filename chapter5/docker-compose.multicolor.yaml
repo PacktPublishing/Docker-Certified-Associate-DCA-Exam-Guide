@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+    red:
+        build: app
+        environment:
+            COLOR: "red"
+        labels:
+            role: backend
+        ports:
+        - 3000
+        networks:
+        - lab
+    green:
+        build: app
+        environment:
+            COLOR: "green"
+        labels:
+            role: backend
+        ports:
+        - 3000
+        networks:
+        - lab
+    white:
+        build: app
+        environment:
+            COLOR: "white"
+        labels:
+            role: backend
+        ports:
+        - 3000
+        networks:
+        - lab
+networks:
+    lab:

@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: blue-app
+  labels:
+    color: blue
+    example: blue-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: blue
+  template:
+    metadata:
+      labels:
+        app: blue
+    spec:
+      containers:
+      - name: blue
+        image: codegazers/colors:1.12
+        env:
+        - name: COLOR
+          value: blue
+        ports:
+        - containerPort: 3000

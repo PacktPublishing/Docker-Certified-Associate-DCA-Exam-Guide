@@ -1,0 +1,52 @@
+version: "3.7"
+
+services:
+  # load balancer
+  lb:
+    build: simplestlb
+    image: myregistry/simplest-lab:simplestlb
+    environment:
+      - APPLICATION_ALIAS=simplestapp
+      - APPLICATION_PORT=3000
+    networks:
+      simplestlab:
+          aliases:
+          - simplestlb
+    ports:
+      - "8080:80"
+  db:
+    build: simplestdb
+    image: myregistry/simplest-lab:simplestdb
+    environment:
+        - "POSTGRES_PASSWORD=changeme"
+    networks:
+       simplestlab:
+        aliases:
+          - simplestdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  app:
+    build: simplestapp
+    image: myregistry/simplest-lab:simplestapp
+    environment:
+      - dbhost=simplestdb
+      - dbname=demo
+      - dbuser=demo
+      - dbpasswd=d3m0
+    networks:
+       simplestlab:
+        aliases:
+          - simplestapp
+    depends_on:
+      - lb
+      - db
+
+volumes:
+  pgdata:
+
+networks:
+  simplestlab:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/16

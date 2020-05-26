@@ -1,0 +1,45 @@
+environment:
+  # Valid Engine Versions are 'experimental', 'test' and 'current'
+  engine_version: "current"
+  experimental: false
+  
+  base_box: "frjaraur/xenial64"
+  base_box_version: "1.4"
+  #proxy: "http://your_proxy_goes_here:with_the_port"
+  ucp_fqdn: "ucp.vagrant.labs"
+  ucp_ip: "10.10.10.11"
+  domain: "vagrant.labs"
+  
+
+boxes:
+- name: "enterprise-node1"
+  swarm_role: "manager"
+  mgmt_ip: "10.10.10.11"
+  hostonly_ip: "192.168.56.11"
+  bridge_interface: "br0"
+  mem: "4096"
+  cpu: "2"
+
+- name: "enterprise-node2"
+  swarm_role: "manager"
+  mgmt_ip: "10.10.10.12"
+  hostonly_ip: "192.168.56.12"
+  bridge_interface: "br0"
+  mem: "4096"
+  cpu: "2"
+
+- name: "enterprise-node3"
+  swarm_role: "manager"
+  mgmt_ip: "10.10.10.13"
+  hostonly_ip: "192.168.56.13"
+  bridge_interface: "br0"
+  mem: "4096"
+  cpu: "2"
+  
+- name: "enterprise-node4"
+  swarm_role: "worker"
+  mgmt_ip: "10.10.10.14"
+  hostonly_ip: "192.168.56.14"
+  bridge_interface: "br0"
+  mem: "4096"
+  cpu: "2"

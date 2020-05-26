@@ -1,0 +1,108 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: blue-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: blue
+  template:
+    metadata:
+      labels:
+        app: blue
+    spec:
+      containers:
+      - name: blue
+        image: codegazers/colors:1.12
+        env:
+        - name: COLOR
+          value: blue
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue-svc
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: blue
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: red-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: red 
+  template:
+    metadata:
+      labels:
+        app: red 
+    spec:
+      containers:
+      - name: red 
+        image: codegazers/colors:1.12
+        env:
+        - name: COLOR
+          value: red
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: red-svc
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: red
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: green-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: green
+  template:
+    metadata:
+      labels:
+        app: green
+    spec:
+      containers:
+      - name: green
+        image: codegazers/colors:1.12
+        env:
+        - name: COLOR
+          value: green
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: green-svc
+spec:
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: green
