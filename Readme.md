@@ -32,8 +32,8 @@ This tables shows the required resources for each virtual environment.
 | Chapters | Environment | Virtual Nodes | Requirements |
 |---|---|---|---|
 | chapters 1 to 6 |[Standalone](./environments/standalone) | 1 standalone | 1vCPU, 2GB of RAM and 10GB of disk space. |
-| chapter8 | [Docker Swarm Custer](./environments/swarm) | 4 virtual nodes | 4vCPU, 8GB of RAM and 50GB of disk space. |
-| chapter9 | [Kubernetes Custer](./environments/kubernetes) | 3 virtual nodes | 4vCPU, 8GB of RAM and 50GB of disk space. |
+| chapter 8 | [Docker Swarm Custer](./environments/swarm) | 4 virtual nodes | 4vCPU, 8GB of RAM and 50GB of disk space. |
+| chapter 9 | [Kubernetes Custer](./environments/kubernetes) | 3 virtual nodes | 4vCPU, 8GB of RAM and 50GB of disk space. |
 | chapters 11 to 13 | [Docker Enterprise](./environments/enterprise) | 4 virtual nodes | 8vCPU, 16GB of RAM and 100GB of disk space. |
 
 Lab environments were tested on Linux and Windows 10 Pro and you can change the number of nodes and virtual resources modifying ___config.yaml___ file. There are specific instructions on each environment.
