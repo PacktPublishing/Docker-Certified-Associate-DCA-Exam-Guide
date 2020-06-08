@@ -4,8 +4,13 @@
 
 ----
 ## Requirements (follow each product guide):
- - Install Vagrant - https://www.vagrantup.com/
- - Install Virtualbox - https://www.virtualbox.org/
+ - Install Vagrant (tested on 2.2.7+) - https://www.vagrantup.com/
+    - https://www.vagrantup.com/intro/getting-started/install.html
+    - https://www.vagrantup.com/downloads
+
+
+ - Install Virtualbox (tested on 6.0.0+)- https://www.virtualbox.org/
+    - https://www.virtualbox.org/wiki/Downloads
  
 ----
 
