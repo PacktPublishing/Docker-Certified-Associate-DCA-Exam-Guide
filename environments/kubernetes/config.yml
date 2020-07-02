@@ -3,6 +3,7 @@ environment:
   engine_version: "current"
   experimental: false
   kubernetes_version: "1.14.0-00"
+  kubernetes_cni_package_version: "0.7.5-00"
   kubernetes_cni_url: "https://docs.projectcalico.org/v3.8/manifests/calico.yaml"
 
   base_box: "frjaraur/xenial64"

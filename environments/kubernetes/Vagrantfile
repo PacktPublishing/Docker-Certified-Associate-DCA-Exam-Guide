@@ -22,6 +22,7 @@ base_box_version=config['environment']['base_box_version']
 
 engine_version=config['environment']['engine_version']
 kubernetes_version=config['environment']['kubernetes_version']
+kubernetes_cni_package_version=config['environment']['kubernetes_cni_package_version']
 kubernetes_cni_url=config['environment']['kubernetes_cni_url']
 kubernetes_master_ip=config['environment']['kubernetes_master_ip']
 
@@ -81,7 +82,7 @@ $install_kubernetes = <<SCRIPT
   curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
   echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list 
   apt-get update -qq
-  apt-get install -y --allow-unauthenticated kubelet=$1 kubeadm=$1 kubectl=$1 kubernetes-cni
+  apt-get install -y --allow-unauthenticated kubelet=$1 kubeadm=$1 kubectl=$1 kubernetes-cni=$2
   sed -i \'9s/^/Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"\\n/\' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
   systemctl daemon-reload
   systemctl enable kubelet
@@ -192,7 +193,7 @@ Vagrant.configure(2) do |config|
       config.vm.provision "shell" do |s|
         s.name       = "Install Kubernetes packages version "+kubernetes_version
         s.inline     = $install_kubernetes
-        s.args       = [kubernetes_version, kubernetes_cni_url]
+        s.args       = [kubernetes_version, kubernetes_cni_package_version, kubernetes_cni_url]
       end
     
       if node['role'] == "master"
