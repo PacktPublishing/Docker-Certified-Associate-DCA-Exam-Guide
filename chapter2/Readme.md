@@ -484,7 +484,7 @@ COPY html/* /usr/share/nginx/html
 ```
 [vagrant@standalone templating]$ docker image build \
 --file Dockerfile.application \
--t templated:production \
+-t templated:development \
 --build-arg ENVIRONMENT=development \
 --label lab=lab4 .
  Sending build context to Docker daemon  5.632kB
